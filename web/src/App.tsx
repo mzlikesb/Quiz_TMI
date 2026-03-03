@@ -101,11 +101,11 @@ function cx(...parts: Array<string | false | null | undefined>): string {
   return parts.filter(Boolean).join(' ')
 }
 
-function Card({ className, children }: { className?: string; children: ReactNode }) {
+function Panel({ className, children }: { className?: string; children: ReactNode }) {
   return (
     <section
       className={cx(
-        'rounded-3xl border border-white/12 bg-slate-900/70 p-4 shadow-[0_10px_35px_rgba(2,6,23,0.5)] backdrop-blur-sm sm:p-5',
+        'rounded-[16px] border border-white/10 bg-[rgba(255,255,255,0.06)] p-5 shadow-[0_4px_24px_rgba(0,0,0,0.3)] backdrop-blur-[12px] sm:p-6',
         className,
       )}
     >
@@ -116,18 +116,18 @@ function Card({ className, children }: { className?: string; children: ReactNode
 
 function Badge({ className, children }: { className?: string; children: ReactNode }) {
   return (
-    <span className={cx('inline-flex items-center rounded-full px-3 py-1 text-xs font-bold uppercase tracking-[0.16em]', className)}>
+    <span className={cx('inline-flex items-center rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-[0.14em]', className)}>
       {children}
     </span>
   )
 }
 
-function StatCard({ label, value }: { label: string; value: string | number }) {
+function ScoreCard({ label, value }: { label: string; value: string | number }) {
   return (
-    <Card className="p-3 text-center sm:p-4">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">{label}</p>
-      <p className="mt-1 text-3xl font-extrabold leading-none text-slate-100">{value}</p>
-    </Card>
+    <div className="rounded-[16px] border border-white/10 bg-[rgba(255,255,255,0.08)] px-4 py-4 shadow-[0_4px_24px_rgba(0,0,0,0.3)] backdrop-blur-[12px]">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/70">{label}</p>
+      <p className="mt-2 text-[2.15em] font-black leading-none text-[#FF6B9D]">{value}</p>
+    </div>
   )
 }
 
@@ -140,7 +140,7 @@ function PrimaryButton({
     <button
       type="button"
       className={cx(
-        'min-h-14 w-full rounded-2xl border px-5 py-4 text-base font-extrabold tracking-wide transition duration-150 active:translate-y-[1px]',
+        'min-h-12 w-full rounded-[14px] border px-5 py-3 text-sm font-extrabold tracking-wide transition duration-150 active:translate-y-[1px]',
         className,
       )}
       {...props}
@@ -163,7 +163,6 @@ function App() {
   const timelineIdRef = useRef(0)
 
   const userId = useMemo(() => getOrCreateUserId(), [])
-  const displayName = useMemo(() => `Player-${userId.slice(-4)}`, [userId])
 
   const pushEvent = useCallback((message: string) => {
     timelineIdRef.current += 1
@@ -206,7 +205,7 @@ function App() {
       sendJson({
         type: 'hello',
         userId,
-        displayName,
+        displayName: `Player-${userId.slice(-4)}`,
         version: 'web-ui-v1',
       })
     }
@@ -268,7 +267,7 @@ function App() {
         connectWebSocket()
       }, delayMs)
     }
-  }, [displayName, pushEvent, sendJson, userId])
+  }, [pushEvent, sendJson, userId])
 
   useEffect(() => {
     shouldReconnectRef.current = true
@@ -320,13 +319,13 @@ function App() {
   }
 
   const statusClassName: Record<UiStatus, string> = {
-    Listening: 'bg-emerald-500/18 text-emerald-200 ring-1 ring-emerald-300/45',
-    Speaking: 'bg-sky-500/18 text-sky-200 ring-1 ring-sky-300/45',
-    Interrupted: 'bg-amber-500/18 text-amber-200 ring-1 ring-amber-300/45',
-    Judging: 'bg-orange-500/18 text-orange-200 ring-1 ring-orange-300/45',
-    Scored: 'bg-violet-500/18 text-violet-200 ring-1 ring-violet-300/45',
-    Reconnecting: 'bg-slate-500/20 text-slate-200 ring-1 ring-slate-300/40',
-    Error: 'bg-rose-500/18 text-rose-200 ring-1 ring-rose-300/45',
+    Listening: 'bg-emerald-500/20 text-emerald-100 ring-1 ring-emerald-200/45',
+    Speaking: 'bg-sky-500/20 text-sky-100 ring-1 ring-sky-200/45',
+    Interrupted: 'bg-amber-500/20 text-amber-100 ring-1 ring-amber-200/45',
+    Judging: 'bg-orange-500/20 text-orange-100 ring-1 ring-orange-200/45',
+    Scored: 'bg-[#FF6B9D]/20 text-[#FFD6E4] ring-1 ring-[#FF6B9D]/45',
+    Reconnecting: 'bg-slate-500/20 text-slate-100 ring-1 ring-slate-200/30',
+    Error: 'bg-rose-500/20 text-rose-100 ring-1 ring-rose-200/45',
   }
 
   const faceSprite = (() => {
@@ -349,78 +348,78 @@ function App() {
   })()
 
   const scorePopupSprite = status === 'Scored' ? (lastCorrect ? '/sprites/text/correct.png' : '/sprites/text/fail.png') : null
-  const subtitle =
-    status === 'Speaking'
-      ? 'Listen closely, then cut in with the winning answer.'
-      : 'Stay sharp and answer instantly when your moment appears.'
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[radial-gradient(circle_at_16%_8%,#1a4b77_0%,#0b1325_48%,#030712_100%)] px-3 py-4 text-slate-100 sm:px-6 sm:py-8">
-      <div className="pointer-events-none absolute -left-20 top-16 h-48 w-48 rounded-full bg-cyan-400/10 blur-3xl" />
-      <div className="pointer-events-none absolute -right-14 top-32 h-52 w-52 rounded-full bg-emerald-300/10 blur-3xl" />
-      <div className="mx-auto flex w-full max-w-[440px] flex-col gap-4 lg:max-w-5xl lg:gap-6">
-        <Card className="relative overflow-hidden border-cyan-300/20 bg-gradient-to-b from-slate-900/90 to-slate-950/90">
-          <div className="pointer-events-none absolute -right-12 -top-12 h-36 w-36 rounded-full bg-cyan-300/10 blur-3xl" />
-          <div className="relative flex flex-col gap-3">
-            <div className="flex items-start justify-between gap-2">
-              <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-cyan-200/80">Live Challenge</p>
-                <h1 className="mt-1 text-3xl font-extrabold leading-none tracking-tight text-white sm:text-4xl">Interruption Quiz</h1>
-              </div>
+    <main className="relative min-h-screen overflow-hidden bg-[#121212] px-4 py-8 text-white sm:px-8 sm:py-10">
+      <div className="pointer-events-none absolute -left-24 -top-16 h-72 w-72 rounded-full bg-[#FF6B9D]/15 blur-3xl" />
+      <div className="pointer-events-none absolute -right-16 top-24 h-80 w-80 rounded-full bg-[#FF6B9D]/10 blur-3xl" />
+
+      <p className="absolute right-4 top-4 text-[11px] text-white/65 sm:right-8 sm:top-5">
+        userId: <span className="font-mono">{userId}</span>
+      </p>
+
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-8">
+        <Panel className="relative overflow-visible pt-10 sm:pt-12">
+          <div className="max-w-[44rem] pr-28 sm:pr-36">
+            <h1 className="text-4xl font-black leading-none tracking-tight text-[#FF6B9D] sm:text-6xl">Interruption Quiz</h1>
+            <p className="mt-4 text-sm leading-relaxed text-white/75 sm:text-base">
+              실시간 인터럽트 타이밍을 겨루는 게임 대시보드. 상태를 보고 즉시 선택해서 최고 점수를 갱신하세요.
+            </p>
+            <div className="mt-4">
               <Badge className={statusClassName[status]}>{status}</Badge>
             </div>
-            <p className="max-w-[44ch] text-sm leading-relaxed text-slate-300">{subtitle}</p>
-            <p className="text-[11px] text-slate-500">
-              userId: <span className="font-mono text-slate-300">{userId}</span> | displayName:{' '}
-              <span className="font-mono text-slate-300">{displayName}</span>
-            </p>
           </div>
-        </Card>
 
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)] lg:items-start lg:gap-6">
-          <div className="flex flex-col gap-4">
-            <Card className="border-cyan-200/20 bg-slate-900/75 shadow-[0_12px_38px_rgba(6,182,212,0.1),0_10px_30px_rgba(2,6,23,0.55)]">
-              <div className="relative mx-auto w-full max-w-[320px] overflow-visible">
-                <img src={faceSprite} alt={`Luca ${status}`} className="mx-auto block h-auto w-full select-none" />
-                {scorePopupSprite ? (
-                  <img
-                    src={scorePopupSprite}
-                    alt={lastCorrect ? 'Correct' : 'Fail'}
-                    className="pointer-events-none absolute -top-3 left-1/2 h-auto w-[58%] max-w-[180px] -translate-x-1/2 select-none object-contain drop-shadow-[0_0_14px_rgba(255,255,255,0.35)]"
-                  />
-                ) : null}
+          <div className="pointer-events-none absolute -bottom-12 right-3 z-20 w-[140px] sm:-bottom-16 sm:right-8 sm:w-[220px]">
+            <img
+              src={faceSprite}
+              alt={`Luca ${status}`}
+              className="h-auto w-full select-none [filter:drop-shadow(0_0_20px_rgba(255,107,157,0.6))]"
+            />
+            {scorePopupSprite ? (
+              <img
+                src={scorePopupSprite}
+                alt={lastCorrect ? 'Correct' : 'Fail'}
+                className="absolute -left-10 top-1 h-auto w-[70%] select-none object-contain [filter:drop-shadow(0_0_16px_rgba(255,255,255,0.5))]"
+              />
+            ) : null}
+          </div>
+        </Panel>
+
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.4fr_1fr]">
+          <div className="flex flex-col gap-6">
+            <section>
+              <p className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-white/55">Scoreboard</p>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                <ScoreCard label="Total" value={score.total} />
+                <ScoreCard label="Best" value={score.best} />
+                <ScoreCard label="Delta" value={score.delta >= 0 ? `+${score.delta}` : score.delta} />
               </div>
-            </Card>
+            </section>
 
-            <div className="grid grid-cols-3 gap-2.5 sm:gap-3">
-              <StatCard label="Total" value={score.total} />
-              <StatCard label="Best" value={score.best} />
-              <StatCard label="Delta" value={score.delta >= 0 ? `+${score.delta}` : score.delta} />
-            </div>
-
-            <Card className="border-slate-200/15">
+            <Panel>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <PrimaryButton
                   onClick={handleStartRun}
-                  className="border-emerald-200/65 bg-emerald-500 text-white shadow-[0_9px_22px_rgba(16,185,129,0.38),inset_0_-3px_0_rgba(6,78,59,0.6)] hover:bg-emerald-400"
+                  className="border-[#FF6B9D]/70 bg-[#FF6B9D] text-[#1D0D14] shadow-[0_8px_18px_rgba(255,107,157,0.35)] hover:brightness-110"
                 >
                   Start Run
                 </PrimaryButton>
                 <PrimaryButton
                   onClick={handleStopReset}
-                  className="border-rose-200/65 bg-rose-500 text-white shadow-[0_9px_22px_rgba(244,63,94,0.34),inset_0_-3px_0_rgba(136,19,55,0.6)] hover:bg-rose-400"
+                  className="border-white/20 bg-white/8 text-white shadow-[0_8px_18px_rgba(0,0,0,0.28)] hover:bg-white/15"
                 >
                   Stop / Reset
                 </PrimaryButton>
               </div>
 
-              <div className="mt-4 grid grid-cols-3 gap-3">
+              <div className="mt-5 grid grid-cols-3 gap-3">
                 {(['A', 'B', 'C'] as const).map((choice) => (
                   <button
                     key={choice}
                     type="button"
                     onClick={() => handleAnswer(choice)}
-                    className="aspect-square w-full rounded-full border-2 border-cyan-200/70 bg-[radial-gradient(circle_at_30%_20%,#7dd3fc_0%,#06b6d4_62%,#0e7490_100%)] text-4xl font-black text-slate-950 shadow-[0_10px_22px_rgba(14,116,144,0.55)] transition hover:brightness-110 active:translate-y-[1px]"
+                    className="aspect-square w-full rounded-full border border-[#FF6B9D]/70 bg-[#2B1A22] text-4xl font-black text-[#FF6B9D] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06),0_10px_24px_rgba(0,0,0,0.3)] transition hover:brightness-125 active:translate-y-[1px]"
                   >
                     {choice}
                   </button>
@@ -429,49 +428,43 @@ function App() {
 
               <PrimaryButton
                 onClick={handleSimulateDrop}
-                className="mt-4 min-h-12 border-slate-500/70 bg-slate-800 text-slate-100 shadow-[0_8px_20px_rgba(2,6,23,0.45)] hover:bg-slate-700"
+                className="mt-5 border-white/15 bg-[#1B1B1B] text-white/85 shadow-[0_8px_18px_rgba(0,0,0,0.3)] hover:bg-[#262626]"
               >
                 Simulate Drop
               </PrimaryButton>
-            </Card>
+            </Panel>
           </div>
 
-          <Card className="border-slate-300/15">
+          <Panel>
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-bold tracking-tight text-white">Event Timeline</h2>
-              <Badge className="bg-slate-700/75 text-slate-200 ring-1 ring-slate-500/70">Last 10</Badge>
+              <Badge className="bg-white/10 text-white/80 ring-1 ring-white/15">Last 10</Badge>
             </div>
 
-            <ul className="mt-3 space-y-1.5">
+            <ul className="mt-4 space-y-2">
               {timeline.length === 0 ? (
-                <li className="rounded-xl border border-slate-700 bg-slate-950/80 px-3 py-2.5 text-sm text-slate-500">No events yet.</li>
+                <li className="rounded-xl border border-white/10 bg-black/20 px-3 py-2.5 text-sm text-white/55">No events yet.</li>
               ) : (
-                timeline.map((item, index) => {
+                timeline.map((item) => {
                   const isOutbound = item.message.startsWith('Sent')
                   const isInbound = item.message.startsWith('Received')
                   const icon = isOutbound ? '↑' : isInbound ? '↓' : '•'
 
                   return (
-                    <li
-                      key={item.id}
-                      className={cx(
-                        'flex items-start gap-3 rounded-xl border px-3 py-2.5',
-                        index % 2 === 0 ? 'border-slate-700 bg-slate-950/75' : 'border-slate-600/70 bg-slate-900/80',
-                      )}
-                    >
-                      <span className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-slate-800 text-[11px] font-bold text-cyan-200 ring-1 ring-slate-600">
+                    <li key={item.id} className="flex items-start gap-3 rounded-xl border border-white/10 bg-black/20 px-3 py-2.5">
+                      <span className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#FF6B9D]/20 text-[11px] font-bold text-[#FF6B9D] ring-1 ring-[#FF6B9D]/35">
                         {icon}
                       </span>
                       <div className="min-w-0">
-                        <p className="font-mono text-[11px] text-slate-500">{item.timestamp}</p>
-                        <p className="mt-0.5 text-sm leading-snug text-slate-200">{item.message}</p>
+                        <p className="font-mono text-[11px] text-white/45">{item.timestamp}</p>
+                        <p className="mt-0.5 text-sm leading-snug text-white/85">{item.message}</p>
                       </div>
                     </li>
                   )
                 })
               )}
             </ul>
-          </Card>
+          </Panel>
         </div>
       </div>
     </main>
