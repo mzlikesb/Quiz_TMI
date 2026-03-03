@@ -39,9 +39,9 @@ Interruption Quiz — Web + Cloud Run Implementation Tasks (Minimal)
 - 완료 기준: 끊었다가 자동 복구되는 UX 시연 가능
 
 ### T0-06 문제은행 로딩 + 문제 선택(서버 권위)
-- [ ] `assets/questions.json` 로드(서버)
-- [ ] `start_run` 요청 시 `qId/runId/startedAt` 생성
-- [ ] `question_meta`를 클라이언트로 전송
+- [x] `assets/questions.json` 로드(서버)
+- [x] `start_run` 요청 시 `qId/runId/startedAt` 생성
+- [x] `question_meta`를 클라이언트로 전송
 - 완료 기준: Web UI에 `qId/runId` 표시됨
 
 ### T0-07 Gemini Live 연결(서버) + 루카 음성 출력(클라 재생)

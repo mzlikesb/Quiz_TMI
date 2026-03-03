@@ -54,8 +54,8 @@ Interruption Quiz — Server (Cloud Run) TODO (Minimal, Hackathon)
 - 완료 기준: start_run → runId 생성/저장
 
 ### S0-06 문제은행 로딩(SSOT)
-- [ ] `assets/questions.json` 로드(서버 시작 시 1회)
-- [ ] 문제 선택 함수:
+- [x] `assets/questions.json` 로드(서버 시작 시 1회)
+- [x] 문제 선택 함수:
   - 랜덤 또는 순차(데모는 2문제만 반복해도 OK)
 - 완료 기준: `start_run` 시 `qId`가 정해짐
 

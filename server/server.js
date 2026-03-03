@@ -1,4 +1,6 @@
 const http = require("http");
+const fs = require("fs");
+const path = require("path");
 const express = require("express");
 const { WebSocketServer } = require("ws");
 
@@ -16,6 +18,24 @@ app.get("/health", (_req, res) => {
 const server = http.createServer(app);
 const wss = new WebSocketServer({ noServer: true });
 const sessions = new Map();
+const QUESTIONS_FILE_PATH = path.join(__dirname, "..", "data", "questions.json");
+let questionBank = [];
+
+function loadQuestionBank() {
+  const raw = fs.readFileSync(QUESTIONS_FILE_PATH, "utf8");
+  const parsed = JSON.parse(raw);
+
+  if (!Array.isArray(parsed) || parsed.length === 0) {
+    throw new Error("question_bank_empty_or_invalid");
+  }
+
+  return parsed;
+}
+
+function selectRandomQuestion() {
+  const index = Math.floor(Math.random() * questionBank.length);
+  return questionBank[index];
+}
 
 function logEvent(event, data = {}) {
   const payload = {
@@ -85,25 +105,22 @@ function handleMessage(ws, raw) {
       break;
     }
     case "start_run": {
+      const selectedQuestion = selectRandomQuestion();
       session.currentRunId = createRunId();
       session.questionStartedAtMs = Date.now();
       session.answered = false;
-      session.currentQuestion = {
-        qId: "demo_q_001",
-        answer: "B",
-        choices: ["A", "B", "C"],
-      };
+      session.currentQuestion = selectedQuestion;
 
       logEvent("question_start", {
         runId: session.currentRunId,
         userId: session.userId,
-        qId: session.currentQuestion.qId,
+        qId: session.currentQuestion.id,
       });
 
       sendFrame(ws, "state", { state: "speaking", runId: session.currentRunId });
       sendFrame(ws, "question_meta", {
         runId: session.currentRunId,
-        qId: session.currentQuestion.qId,
+        qId: session.currentQuestion.id,
         choices: session.currentQuestion.choices,
       });
       sendFrame(ws, "audio_out_chunk", {
@@ -116,6 +133,13 @@ function handleMessage(ws, raw) {
     case "barge_in": {
       if (!session.currentRunId || !session.questionStartedAtMs) {
         sendFrame(ws, "state", { state: "error", reason: "no_active_run" });
+        return;
+      }
+      if (!session.currentQuestion || !session.currentQuestion.answer) {
+        sendFrame(ws, "state", {
+          state: "error",
+          reason: "no_active_question",
+        });
         return;
       }
 
@@ -228,5 +252,10 @@ const heartbeat = setInterval(() => {
 wss.on("close", () => clearInterval(heartbeat));
 
 server.listen(PORT, () => {
+  questionBank = loadQuestionBank();
+  logEvent("question_bank_loaded", {
+    count: questionBank.length,
+    source: QUESTIONS_FILE_PATH,
+  });
   logEvent("server_started", { port: PORT });
 });
