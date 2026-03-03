@@ -44,7 +44,7 @@
 ---
 
 ## 필수 기능 명세 (제출 가능한 최소)
-### Client (Unity)
+### Client (Web)
 - 마이크 캡처 + 오디오 스트리밍 송신
 - 루카 응답 오디오 재생 + **즉시 중단(Stop)**
 - 상태 UI: `Listening / Speaking / Interrupted / Judging / Error / Reconnecting`
@@ -65,7 +65,7 @@
 ---
 
 ## 기술 스택 (포트폴리오/증빙용)
-- **Unity**: 클라이언트(UI + 오디오 I/O)
+- **Web**: 클라이언트(UI + 오디오 I/O)
 - **Google Cloud Run**: 백엔드 호스팅
 - **Gemini Live API (Vertex AI)**: 실시간 음성(루카)
 - **Firestore**: 점수/리더보드 저장 (GCP 서비스 사용 명확)
@@ -76,7 +76,7 @@
 ## 아키텍처(요약)
 ```mermaid
 flowchart LR
-  U[Unity Client\nMic In / Audio Out\nBarge-in + UI] -->|WSS| R[Cloud Run\nSession + Game Engine\nScoring + Judge]
+  U[Web Client\nMic In / Audio Out\nBarge-in + UI] -->|WSS| R[Cloud Run\nSession + Game Engine\nScoring + Judge]
   R -->|Live WS| G[Gemini Live\nLuca Voice Output]
   R --> F[(Firestore)\nScores + Runs]
   R --> L[(Cloud Logging)]

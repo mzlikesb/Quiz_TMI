@@ -1,5 +1,5 @@
 # docs/TODO.md
-Interruption Quiz — Unity + Cloud Run Implementation Tasks (Minimal)
+Interruption Quiz — Web + Cloud Run Implementation Tasks (Minimal)
 
 > 목표: **실시간 음성 + barge-in + 점수 저장(Firestore)**를 60초 데모 루프로 재현 가능하게 만든다.
 > 우선순위는 “데모 재현성” 기준. 각 티켓은 가능한 작게 쪼갠다.
@@ -23,15 +23,15 @@ Interruption Quiz — Unity + Cloud Run Implementation Tasks (Minimal)
 - [ ] `/ws` WebSocket 핸들러 구현(hello 메시지 수신/응답)
 - [ ] `state` 메시지 브로드캐스트(임시 더미)
 - [ ] Cloud Logging에 `session_connected` 기록
-- 완료 기준: Unity에서 WSS 연결 성공 + `state` 수신
+- 완료 기준: Web UI에서 WSS 연결 성공 + `state` 수신
 
-### T0-04 Unity 씬/기본 UI 구축
+### T0-04 Web UI/기본 UI 구축
 - [ ] 상태 배지(Status Badge) + 점수 패널 + Start/Reset 버튼
 - [ ] A/B/C 버튼(백업 입력)
 - [ ] 이벤트 타임라인 UI(최근 10개)
 - 완료 기준: UI만으로 상태/점수/이벤트 표시 가능
 
-### T0-05 Unity WSS 클라이언트 연결/재연결
+### T0-05 Web WSS 클라이언트 연결/재연결
 - [ ] WSS 연결 + `hello(userId, displayName, version)` 전송
 - [ ] 서버 `state/score` 수신 처리
 - [ ] 재연결(지수 백오프) + `Reconnecting…` 상태 표시
@@ -42,16 +42,16 @@ Interruption Quiz — Unity + Cloud Run Implementation Tasks (Minimal)
 - [ ] `assets/questions.json` 로드(서버)
 - [ ] `start_run` 요청 시 `qId/runId/startedAt` 생성
 - [ ] `question_meta`를 클라이언트로 전송
-- 완료 기준: Unity에 `qId/runId` 표시됨
+- 완료 기준: Web UI에 `qId/runId` 표시됨
 
 ### T0-07 Gemini Live 연결(서버) + 루카 음성 출력(클라 재생)
 - [ ] Cloud Run에서 Live 세션 열고 “문제+선택지+뇌절” 말하게 함
-- [ ] Live 오디오 출력 스트림을 Unity로 전달(`audio_out_chunk`)
-- [ ] Unity `AudioOut` 큐 재생 구현
-- 완료 기준: 루카 음성이 Unity에서 들린다(지연이 크더라도 OK)
+- [ ] Live 오디오 출력 스트림을 Web로 전달(`audio_out_chunk`)
+- [ ] Web `AudioOut` 큐 재생 구현
+- 완료 기준: 루카 음성이 Web UI에서 들린다(지연이 크더라도 OK)
 
 ### T0-08 barge-in 핵심(로컬 즉시 stop + 서버 답 제출)
-- [ ] Unity: `Speaking` 중 사용자 입력(A/B/C 버튼) → **즉시 AudioSource.Stop + 큐 Clear**
+- [ ] Web: `Speaking` 중 사용자 입력(A/B/C 버튼) → **즉시 AudioSource.Stop + 큐 Clear**
 - [ ] 서버로 `barge_in(answer, t_ms)` 전송
 - [ ] UI 상태 전이: `Speaking → Interrupted → Judging`
 - 완료 기준: 버튼으로 barge-in이 확실히 “뚝” 끊김
@@ -60,8 +60,8 @@ Interruption Quiz — Unity + Cloud Run Implementation Tasks (Minimal)
 - [ ] 서버: `elapsed_ms` 계산( startedAt 기준)
 - [ ] 정답 비교 + 점수(delta/total) 계산
 - [ ] Firestore `scores/{userId}` 업데이트(누적/최고/횟수)
-- [ ] Unity: `score` 수신 → `Scored` 표시 + 누적 점수 갱신
-- 완료 기준: Firestore 문서가 실제로 업데이트되고 Unity에 반영됨
+- [ ] Web: `score` 수신 → `Scored` 표시 + 누적 점수 갱신
+- 완료 기준: Firestore 문서가 실제로 업데이트되고 Web UI에 반영됨
 
 ### T0-10 루카 리액션(서버) + 다음 라운드 준비
 - [ ] 채점 후 루카가 짧은 리액션 + “오케이 채점!” 출력(짧게)
@@ -96,12 +96,12 @@ Interruption Quiz — Unity + Cloud Run Implementation Tasks (Minimal)
 ## P2 — 있으면 멋짐(시간 남을 때만)
 
 ### T2-01 리더보드 UI
-- [ ] Firestore 상위 N명 쿼리 + Unity에 표시
+- [ ] Firestore 상위 N명 쿼리 + Web UI에 표시
 - 완료 기준: “프로젝트성” 상승(포폴 예쁨)
 
 ### T2-02 runs 로그 저장 + 간단 리플레이
 - [ ] `runs/{runId}` 저장(답, 시간, 점수)
-- [ ] Unity에서 최근 3회 기록 보기
+- [ ] Web UI에서 최근 3회 기록 보기
 - 완료 기준: “아키텍처/데이터” 어필 강화
 
 ### T2-03 문제 생성 파이프라인(루카 생성 → 서버 저장)

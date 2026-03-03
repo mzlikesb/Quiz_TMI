@@ -1,7 +1,7 @@
 # docs/TODO_SERVER.md
 Interruption Quiz — Server (Cloud Run) TODO (Minimal, Hackathon)
 
-> 목표: **Unity 클라이언트와 WSS로 연결**되고, **Gemini Live로 루카 음성**을 흘려주며,  
+> 목표: **Web 프론트엔드와 WSS로 연결**되고, **Gemini Live로 루카 음성**을 흘려주며,  
 > **barge-in → 채점 → Firestore 저장**까지 60초 데모 루프로 재현 가능하게 만든다.
 
 ---
@@ -27,7 +27,7 @@ Interruption Quiz — Server (Cloud Run) TODO (Minimal, Hackathon)
 - [ ] WSS 업그레이드 처리
 - [ ] 연결 시 `session_connected` 로그 남기기
 - [ ] ping/pong(또는 idle timeout 대비)
-- 완료 기준: Unity에서 WSS 연결 성공
+- 완료 기준: Web UI에서 WSS 연결 성공
 
 ### S0-04 메시지 라우터 구현(JSON 프레임)
 - [ ] 수신 메시지 타입 분기:
@@ -40,7 +40,7 @@ Interruption Quiz — Server (Cloud Run) TODO (Minimal, Hackathon)
   - `question_meta`
   - `audio_out_chunk`
   - `score`
-- 완료 기준: 더미 상태/메타를 Unity에 보낼 수 있음
+- 완료 기준: 더미 상태/메타를 Web UI에 보낼 수 있음
 
 ### S0-05 세션/런 상태 저장(메모리 기반)
 - [ ] `Session` 구조체:
@@ -61,8 +61,8 @@ Interruption Quiz — Server (Cloud Run) TODO (Minimal, Hackathon)
 - [ ] start_run 시:
   - `state: speaking`
   - Live에 “문제 + 선택지 + tmi_stream 일부” 말하게 요청
-- [ ] Live 오디오 출력 수신 → Unity에 `audio_out_chunk` 전달
-- 완료 기준: Unity에서 루카 음성이 실제로 들림(1문제)
+- [ ] Live 오디오 출력 수신 → Web UI에 `audio_out_chunk` 전달
+- 완료 기준: Web UI에서 루카 음성이 실제로 들림(1문제)
 
 > 주의: “정답 판정”은 Live가 하지 않음. 말하기만.
 
@@ -71,7 +71,7 @@ Interruption Quiz — Server (Cloud Run) TODO (Minimal, Hackathon)
 - [ ] `elapsed_ms` 계산: `now - questionStartedAtMs`
 - [ ] `state: interrupted → judging`
 - [ ] (가능하면) Live 출력 중단 요청 or 다음 발화 금지
-- 완료 기준: Unity barge-in 후 서버가 판단 단계로 넘어감
+- 완료 기준: Web barge-in 후 서버가 판단 단계로 넘어감
 
 ### S0-09 채점/점수 계산(서버 권위) + Firestore 저장
 - [ ] 정답 비교: `answer == currentQuestion.answer`
@@ -81,8 +81,8 @@ Interruption Quiz — Server (Cloud Run) TODO (Minimal, Hackathon)
   - `delta=base+speed_bonus` (정답일 때)
 - [ ] Firestore 업데이트:
   - `scores/{userId}` totalScore 증가, plays 증가, bestScore 갱신, updatedAt
-- [ ] Unity에 `score {delta,total,correct,elapsed_ms}` 전송
-- 완료 기준: Firestore 문서가 실제 갱신 + Unity 점수 표시
+- [ ] Web UI에 `score {delta,total,correct,elapsed_ms}` 전송
+- 완료 기준: Firestore 문서가 실제 갱신 + Web 점수 표시
 
 ### S0-10 루카 리액션(짧게) + 다음 라운드 준비
 - [ ] 채점 후:
@@ -129,7 +129,7 @@ Interruption Quiz — Server (Cloud Run) TODO (Minimal, Hackathon)
 
 ### S2-01 리더보드 쿼리 API
 - [ ] `get_leaderboard` 메시지 처리
-- [ ] Firestore에서 top N 가져와 Unity로 전송
+- [ ] Firestore에서 top N 가져와 Web로 전송
 - 완료 기준: 리더보드 UI 구현 가능
 
 ### S2-02 문제 생성 파이프라인(루카 생성 → 검수 → 저장)

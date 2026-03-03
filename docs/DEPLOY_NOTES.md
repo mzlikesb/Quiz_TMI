@@ -30,4 +30,4 @@ gcloud run services update <SERVICE_NAME> --timeout=3600
 - WebSocket 연결이 유휴 상태일 때 끊어지지 않도록 서버/클라이언트 양쪽에서 정기적으로 Ping/Pong(또는 더미 메시지) 전송.
 
 ### 2.4 재연결(Reconnect) 전략
-- 클라이언트(Unity)에서 연결 끊김 감지 시 지수 백오프(Exponential Backoff)를 적용하여 재연결 시도 (예: 1초, 2초, 4초, 8초...).
+- 클라이언트(Web)에서 연결 끊김 감지 시 지수 백오프(Exponential Backoff)를 적용하여 재연결 시도 (예: 1초, 2초, 4초, 8초...).

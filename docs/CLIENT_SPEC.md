@@ -1,8 +1,8 @@
 # docs/CLIENT_SPEC.md
-Interruption Quiz — Unity Client Spec (Minimal, Hackathon)
+Interruption Quiz — Web Client Spec (Minimal, Hackathon)
 
 ## 목표
-Unity 클라이언트는 “게임”이 아니라 **실시간 음성 UX + barge-in 체감 + 상태 시각화**를 책임진다.
+Web 프론트엔드는 “게임”이 아니라 **실시간 음성 UX + barge-in 체감 + 상태 시각화**를 책임진다.
 
 **클라이언트 책임**
 - 마이크 입력 캡처

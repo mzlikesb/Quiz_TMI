@@ -12,7 +12,7 @@
 “이건 The Interruption Quiz입니다. 루카가 문제를 내지만 일부러 뇌절을 합니다.
 사용자는 기다리면 손해고, **말로 끊어서(barge-in) 정답을 외쳐야 점수를 얻습니다.**”
 
-화면: Unity 앱 메인(상태 표시 + Start 버튼 + 점수)
+화면: Web 앱 메인(상태 표시 + Start 버튼 + 점수)
 
 ---
 
@@ -55,7 +55,7 @@
 ---
 
 ## 2:40–3:20 운영/안정성(재연결 또는 로그)
-선택 A(권장): Unity에 `Simulate Drop` 버튼
+선택 A(권장): Web UI에 `Simulate Drop` 버튼
 - 눌러서 `Reconnecting…` 표시 → 자동 복구
 
 선택 B: Cloud Run 로그 화면으로 이벤트 라인 보여주기

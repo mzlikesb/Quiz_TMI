@@ -1,5 +1,5 @@
 # docs/ARCHITECTURE.md
-Interruption Quiz — System Architecture (Unity + Cloud Run + Gemini Live + Firestore)
+Interruption Quiz — System Architecture (Web + Cloud Run + Gemini Live + Firestore)
 
 ## 목적
 - **실시간 음성(양방향) + barge-in(말 끊기)**를 “게임 규칙”으로 만든다.
@@ -8,7 +8,7 @@ Interruption Quiz — System Architecture (Unity + Cloud Run + Gemini Live + Fir
 ---
 
 ## 1) 구성 요소
-### Unity Client
+### Web Client
 - 마이크 캡처 → 오디오 스트리밍 송신
 - 서버에서 받은 오디오 재생(버퍼 포함)
 - **barge-in 감지**(VAD/단축키/버튼) 후 즉시 로컬 재생 중단
