@@ -9,37 +9,39 @@ Interruption Quiz — Server (Cloud Run) TODO (Minimal, Hackathon)
 ## P0 — 반드시(데모 성립/제출 가능)
 
 ### S0-01 프로젝트/환경 변수 설계
-- [ ] `.env.example` 작성
+- [x] `.env.example` 작성
   - `GCP_PROJECT_ID`
   - `FIRESTORE_DATABASE`(선택)
   - `VERTEX_LOCATION`(예: `us-central1`)
   - `GEMINI_MODEL`(Live 모델명)
   - `ALLOWED_ORIGINS`(개발용)
-- [ ] 런타임에서 Secret/Env로 주입(키/자격정보는 클라에 넣지 않음)
+- [x] 런타임에서 Secret/Env로 주입(키/자격정보는 클라에 넣지 않음)
 - 완료 기준: 로컬/Cloud Run에서 동일하게 실행 가능
 
 ### S0-02 Cloud Run 서비스 스켈레톤
-- [ ] HTTP 서버 부팅 + `/health` 엔드포인트
-- [ ] 구조화 로깅 도입(최소 `event`, `runId`, `userId`)
+- [x] HTTP 서버 부팅 + `/health` 엔드포인트
+- [x] 구조화 로깅 도입(최소 `event`, `runId`, `userId`)
 - 완료 기준: Cloud Run에 배포되고 `/health` OK + Logging에 부팅 로그
 
 ### S0-03 WebSocket 엔드포인트 `/ws`
-- [ ] WSS 업그레이드 처리
-- [ ] 연결 시 `session_connected` 로그 남기기
-- [ ] ping/pong(또는 idle timeout 대비)
+- [x] WSS 업그레이드 처리
+- [x] 연결 시 `session_connected` 로그 남기기
+- [x] ping/pong(또는 idle timeout 대비)
+- [x] Web UI 연결/재연결 통합 테스트 확인
 - 완료 기준: Web UI에서 WSS 연결 성공
 
 ### S0-04 메시지 라우터 구현(JSON 프레임)
-- [ ] 수신 메시지 타입 분기:
+- [x] 수신 메시지 타입 분기:
   - `hello`
   - `start_run`
   - `barge_in`
   - `simulate_drop`(데모용)
-- [ ] 송신 메시지 헬퍼:
+- [x] 송신 메시지 헬퍼:
   - `state`
   - `question_meta`
   - `audio_out_chunk`
   - `score`
+- [x] Web UI `state/score` 수신 반영 동작 확인
 - 완료 기준: 더미 상태/메타를 Web UI에 보낼 수 있음
 
 ### S0-05 세션/런 상태 저장(메모리 기반)

@@ -20,22 +20,22 @@ Interruption Quiz — Web + Cloud Run Implementation Tasks (Minimal)
 - 완료 기준: Cloud Run URL 접근 + Firestore 콘솔 접근
 
 ### T0-03 Cloud Run WebSocket 엔드포인트 스켈레톤
-- [ ] `/ws` WebSocket 핸들러 구현(hello 메시지 수신/응답)
-- [ ] `state` 메시지 브로드캐스트(임시 더미)
-- [ ] Cloud Logging에 `session_connected` 기록
+- [x] `/ws` WebSocket 핸들러 구현(hello 메시지 수신/응답)
+- [x] `state` 메시지 브로드캐스트(임시 더미)
+- [x] Cloud Logging에 `session_connected` 기록
 - 완료 기준: Web UI에서 WSS 연결 성공 + `state` 수신
 
 ### T0-04 Web UI/기본 UI 구축
-- [ ] 상태 배지(Status Badge) + 점수 패널 + Start/Reset 버튼
-- [ ] A/B/C 버튼(백업 입력)
-- [ ] 이벤트 타임라인 UI(최근 10개)
+- [x] 상태 배지(Status Badge) + 점수 패널 + Start/Reset 버튼
+- [x] A/B/C 버튼(백업 입력)
+- [x] 이벤트 타임라인 UI(최근 10개)
 - 완료 기준: UI만으로 상태/점수/이벤트 표시 가능
 
 ### T0-05 Web WSS 클라이언트 연결/재연결
-- [ ] WSS 연결 + `hello(userId, displayName, version)` 전송
-- [ ] 서버 `state/score` 수신 처리
-- [ ] 재연결(지수 백오프) + `Reconnecting…` 상태 표시
-- [ ] `Simulate Drop` 버튼(소켓 강제 close)
+- [x] WSS 연결 + `hello(userId, displayName, version)` 전송
+- [x] 서버 `state/score` 수신 처리
+- [x] 재연결(지수 백오프) + `Reconnecting…` 상태 표시
+- [x] `Simulate Drop` 버튼(소켓 강제 close)
 - 완료 기준: 끊었다가 자동 복구되는 UX 시연 가능
 
 ### T0-06 문제은행 로딩 + 문제 선택(서버 권위)
