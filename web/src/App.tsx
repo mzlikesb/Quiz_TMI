@@ -297,74 +297,74 @@ function App() {
   const scorePopupSprite = status === 'Scored' ? (lastCorrect ? '/sprites/text/correct.png' : '/sprites/text/fail.png') : null
 
   return (
-    <main className="min-h-screen bg-slate-950 px-4 py-8 text-slate-100">
-      <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
-        <header className="rounded-xl border border-slate-800 bg-slate-900 p-4">
+    <main className="min-h-screen bg-[radial-gradient(circle_at_top,#164e63_0%,#0f172a_55%,#020617_100%)] px-3 py-5 text-slate-100 sm:px-5 sm:py-8">
+      <div className="mx-auto flex w-full max-w-4xl flex-col gap-5">
+        <header className="rounded-2xl border border-cyan-500/30 bg-slate-900/80 p-4 shadow-[0_0_0_1px_rgba(6,182,212,0.14),0_20px_40px_rgba(2,6,23,0.45)] backdrop-blur">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <h1 className="text-2xl font-bold">Interruption Quiz</h1>
+            <h1 className="text-2xl font-black tracking-tight sm:text-3xl">Interruption Quiz</h1>
             <span className={`rounded-full px-4 py-1 text-sm font-semibold ring-1 ${statusClassName[status]}`}>
               {status}
             </span>
           </div>
-          <p className="mt-2 text-sm text-slate-400">
+          <p className="mt-2 text-xs text-slate-400 sm:text-sm">
             userId: <span className="font-mono">{userId}</span> | displayName:{' '}
             <span className="font-mono">{displayName}</span>
           </p>
         </header>
 
-        <section className="rounded-xl border border-slate-800 bg-slate-900 p-4">
-          <div className="relative mx-auto w-full max-w-sm">
-            <img src={faceSprite} alt={`Luca ${status}`} className="mx-auto w-full max-w-xs select-none" />
+        <section className="rounded-2xl border border-slate-700 bg-slate-900/80 p-4 shadow-lg backdrop-blur">
+          <div className="relative mx-auto w-full max-w-[320px] overflow-hidden">
+            <img src={faceSprite} alt={`Luca ${status}`} className="mx-auto block h-auto w-full select-none" />
             {scorePopupSprite ? (
               <img
                 src={scorePopupSprite}
                 alt={lastCorrect ? 'Correct' : 'Fail'}
-                className="pointer-events-none absolute -top-6 left-1/2 w-40 -translate-x-1/2 select-none"
+                className="pointer-events-none absolute -top-3 left-1/2 h-auto w-[58%] max-w-[180px] -translate-x-1/2 select-none object-contain"
               />
             ) : null}
           </div>
         </section>
 
-        <section className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          <div className="rounded-xl border border-slate-800 bg-slate-900 p-4">
+        <section className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <div className="rounded-2xl border border-slate-700 bg-slate-900/80 p-4 text-center shadow-lg backdrop-blur">
             <p className="text-sm text-slate-400">Total</p>
-            <p className="mt-2 text-3xl font-bold">{score.total}</p>
+            <p className="mt-1 text-3xl font-black">{score.total}</p>
           </div>
-          <div className="rounded-xl border border-slate-800 bg-slate-900 p-4">
+          <div className="rounded-2xl border border-slate-700 bg-slate-900/80 p-4 text-center shadow-lg backdrop-blur">
             <p className="text-sm text-slate-400">Best</p>
-            <p className="mt-2 text-3xl font-bold">{score.best}</p>
+            <p className="mt-1 text-3xl font-black">{score.best}</p>
           </div>
-          <div className="rounded-xl border border-slate-800 bg-slate-900 p-4">
+          <div className="rounded-2xl border border-slate-700 bg-slate-900/80 p-4 text-center shadow-lg backdrop-blur">
             <p className="text-sm text-slate-400">Delta</p>
-            <p className="mt-2 text-3xl font-bold">{score.delta >= 0 ? `+${score.delta}` : score.delta}</p>
+            <p className="mt-1 text-3xl font-black">{score.delta >= 0 ? `+${score.delta}` : score.delta}</p>
           </div>
         </section>
 
-        <section className="rounded-xl border border-slate-800 bg-slate-900 p-4">
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+        <section className="rounded-2xl border border-slate-700 bg-slate-900/85 p-4 shadow-lg backdrop-blur">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <button
               type="button"
               onClick={handleStartRun}
-              className="rounded-xl bg-emerald-500 px-5 py-4 text-lg font-bold text-slate-950 transition hover:bg-emerald-400"
+              className="min-h-14 w-full rounded-xl border-2 border-emerald-200/70 bg-emerald-500 px-5 py-4 text-lg font-black text-white shadow-[0_8px_0_#14532d] transition hover:bg-emerald-400 active:translate-y-[1px]"
             >
               Start Run
             </button>
             <button
               type="button"
               onClick={handleStopReset}
-              className="rounded-xl bg-rose-500 px-5 py-4 text-lg font-bold text-slate-950 transition hover:bg-rose-400"
+              className="min-h-14 w-full rounded-xl border-2 border-rose-200/70 bg-rose-500 px-5 py-4 text-lg font-black text-white shadow-[0_8px_0_#7f1d1d] transition hover:bg-rose-400 active:translate-y-[1px]"
             >
               Stop / Reset
             </button>
           </div>
 
-          <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-3">
+          <div className="mt-3 grid grid-cols-3 gap-3">
             {(['A', 'B', 'C'] as const).map((choice) => (
               <button
                 key={choice}
                 type="button"
                 onClick={() => handleAnswer(choice)}
-                className="rounded-xl bg-cyan-500 px-5 py-6 text-3xl font-black text-slate-950 transition hover:bg-cyan-400"
+                className="min-h-[4.5rem] w-full rounded-xl border-2 border-cyan-200/70 bg-cyan-500 px-4 py-4 text-3xl font-black text-slate-950 shadow-[0_8px_0_#155e75] transition hover:bg-cyan-400 active:translate-y-[1px]"
               >
                 {choice}
               </button>
@@ -374,20 +374,20 @@ function App() {
           <button
             type="button"
             onClick={handleSimulateDrop}
-            className="mt-3 w-full rounded-xl bg-slate-700 px-5 py-3 text-base font-semibold text-slate-100 transition hover:bg-slate-600"
+            className="mt-3 min-h-12 w-full rounded-xl border-2 border-slate-500 bg-slate-700 px-5 py-3 text-base font-bold text-slate-100 transition hover:bg-slate-600"
           >
             Simulate Drop
           </button>
         </section>
 
-        <section className="rounded-xl border border-slate-800 bg-slate-900 p-4">
+        <section className="rounded-2xl border border-slate-700 bg-slate-900/85 p-4 shadow-lg backdrop-blur">
           <h2 className="text-lg font-semibold">Event Timeline (Last 10)</h2>
           <ul className="mt-3 space-y-2">
             {timeline.length === 0 ? (
-              <li className="rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-slate-500">No events yet.</li>
+              <li className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-500">No events yet.</li>
             ) : (
               timeline.map((item) => (
-                <li key={item.id} className="rounded-lg border border-slate-800 bg-slate-950 px-3 py-2">
+                <li key={item.id} className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2">
                   <span className="mr-2 font-mono text-xs text-slate-500">{item.timestamp}</span>
                   <span className="text-sm text-slate-200">{item.message}</span>
                 </li>

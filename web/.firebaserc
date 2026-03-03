@@ -1,5 +1,8 @@
 {
   "projects": {
-    "default": "gemini-agent-challenge-489100"
-  }
+    "default": "quiz-tmi",
+    "quiz-tmi": "quiz-tmi"
+  },
+  "targets": {},
+  "etags": {}
 }
