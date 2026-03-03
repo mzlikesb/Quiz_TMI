@@ -1,0 +1,25 @@
+{
+  "name": "google-agent-challenge",
+  "version": "1.0.0",
+  "description": "Interruption Quiz Cloud Run WebSocket server",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mzlikesb/Quiz_TMI.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.21.2",
+    "ws": "^8.18.3"
+  },
+  "bugs": {
+    "url": "https://github.com/mzlikesb/Quiz_TMI/issues"
+  },
+  "homepage": "https://github.com/mzlikesb/Quiz_TMI#readme"
+}
