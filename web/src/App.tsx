@@ -81,6 +81,8 @@ function toNumber(value: unknown, fallback: number): number {
 function App() {
   const [status, setStatus] = useState<UiStatus>('Reconnecting')
   const [score, setScore] = useState<ScoreState>({ total: 0, best: 0, delta: 0 })
+  const [lastCorrect, setLastCorrect] = useState<boolean | null>(null)
+  const [speakingFrameWide, setSpeakingFrameWide] = useState(false)
   const [timeline, setTimeline] = useState<TimelineEvent[]>([])
   const wsRef = useRef<WebSocket | null>(null)
   const reconnectTimerRef = useRef<number | null>(null)
@@ -152,8 +154,15 @@ function App() {
         }
 
         if (type === 'score') {
+          const delta = toNumber(payload.delta ?? payload.scoreDelta, 0)
+          const isCorrect = payload.correct ?? payload.isCorrect
+          if (typeof isCorrect === 'boolean') {
+            setLastCorrect(isCorrect)
+          } else {
+            setLastCorrect(delta > 0)
+          }
+
           setScore((prev) => {
-            const delta = toNumber(payload.delta ?? payload.scoreDelta, 0)
             const total = toNumber(payload.total ?? payload.totalScore, prev.total + delta)
             const best = toNumber(payload.best ?? payload.bestScore, Math.max(prev.best, total))
             return { delta, total, best }
@@ -202,6 +211,21 @@ function App() {
     }
   }, [connectWebSocket])
 
+  useEffect(() => {
+    if (status !== 'Speaking') {
+      setSpeakingFrameWide(false)
+      return
+    }
+
+    const timerId = window.setInterval(() => {
+      setSpeakingFrameWide((prev) => !prev)
+    }, 180)
+
+    return () => {
+      window.clearInterval(timerId)
+    }
+  }, [status])
+
   const handleStartRun = () => {
     sendJson({ type: 'start_run' })
   }
@@ -233,6 +257,27 @@ function App() {
     Error: 'bg-rose-100 text-rose-700 ring-rose-200',
   }
 
+  const faceSprite = (() => {
+    switch (status) {
+      case 'Listening':
+        return '/sprites/face/02_listening.png'
+      case 'Speaking':
+        return speakingFrameWide ? '/sprites/face/03_speaking_wide.png' : '/sprites/face/04_speaking_half.png'
+      case 'Interrupted':
+        return '/sprites/face/05_shocked.png'
+      case 'Scored':
+        return lastCorrect ? '/sprites/face/06_proud.png' : '/sprites/face/07_confused.png'
+      case 'Error':
+      case 'Reconnecting':
+        return '/sprites/face/07_confused.png'
+      case 'Judging':
+      default:
+        return '/sprites/face/01_neutral.png'
+    }
+  })()
+
+  const scorePopupSprite = status === 'Scored' ? (lastCorrect ? '/sprites/text/correct.png' : '/sprites/text/fail.png') : null
+
   return (
     <main className="min-h-screen bg-slate-950 px-4 py-8 text-slate-100">
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
@@ -248,6 +293,19 @@ function App() {
             <span className="font-mono">{displayName}</span>
           </p>
         </header>
+
+        <section className="rounded-xl border border-slate-800 bg-slate-900 p-4">
+          <div className="relative mx-auto w-full max-w-sm">
+            <img src={faceSprite} alt={`Luca ${status}`} className="mx-auto w-full max-w-xs select-none" />
+            {scorePopupSprite ? (
+              <img
+                src={scorePopupSprite}
+                alt={lastCorrect ? 'Correct' : 'Fail'}
+                className="pointer-events-none absolute -top-6 left-1/2 w-40 -translate-x-1/2 select-none"
+              />
+            ) : null}
+          </div>
+        </section>
 
         <section className="grid grid-cols-1 gap-4 md:grid-cols-3">
           <div className="rounded-xl border border-slate-800 bg-slate-900 p-4">

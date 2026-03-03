@@ -26,8 +26,8 @@ Interruption Quiz — Work Plan (Web Client + Cloud Run)
 - [ ] (선택) VAD를 이용해 버튼 대신 음성으로 끊기 감지
 
 ### MVP3 (비주얼 & 디테일)
-- [ ] 생성된 스프라이트(`sprites/`) 에셋을 Web UI에 적용 (상태에 따른 표정 변화)
-- [ ] "정답!", "실패..." 텍스트 스프라이트 팝업 연출
+- [x] 생성된 스프라이트(`sprites/`) 에셋을 Web UI에 적용 (상태에 따른 표정 변화)
+- [x] "정답!", "실패..." 텍스트 스프라이트 팝업 연출
 
 ## 인터페이스(고정)
 - WSS: `wss://<cloud-run-host>/ws` (로컬은 `ws://localhost:8080/ws`)
