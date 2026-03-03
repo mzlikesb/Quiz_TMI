@@ -21,7 +21,25 @@ type ScoreState = {
   delta: number
 }
 
-const WS_URL = 'ws://localhost:8080/ws'
+function resolveWsUrl(): string {
+  const envBase = (import.meta.env.VITE_WS_BASE_URL as string | undefined)?.trim()
+
+  if (envBase) {
+    const normalized = envBase.replace(/\/$/, '')
+    const wsBase = normalized.startsWith('http')
+      ? normalized.replace(/^http/, 'ws')
+      : normalized
+    return wsBase.endsWith('/ws') ? wsBase : `${wsBase}/ws`
+  }
+
+  if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+    return 'ws://localhost:8080/ws'
+  }
+
+  return 'wss://quiz-tmi-801541606537.us-central1.run.app/ws'
+}
+
+const WS_URL = resolveWsUrl()
 const USER_ID_KEY = 'interruption_quiz_user_id'
 
 function getOrCreateUserId(): string {
