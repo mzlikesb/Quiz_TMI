@@ -9,14 +9,14 @@ Interruption Quiz — Web + Cloud Run Implementation Tasks (Minimal)
 ## P0 — 반드시(데모 성립/제출 가능)
 
 ### T0-01 Repo/문서 뼈대 정리
-- [ ] `docs/ONEPAGER.md`, `docs/DEMO_SCRIPT.md`, `docs/ARCHITECTURE.md`, `docs/CLIENT_SPEC.md`, `docs/CONTENT_PIPELINE.md` 추가
-- [ ] `assets/questions.json` 자리(빈 파일) 생성
+- [x] `docs/ONEPAGER.md`, `docs/DEMO_SCRIPT.md`, `docs/ARCHITECTURE.md`, `docs/CLIENT_SPEC.md`, `docs/CONTENT_PIPELINE.md` 추가
+- [x] `assets/questions.json` 자리(빈 파일) 생성
 - 완료 기준: repo에 문서/폴더 구조가 잡힘
 
 ### T0-02 GCP 프로젝트 기본 세팅
-- [ ] GCP Project 생성, Vertex AI/Gemini Live 사용 권한 확인
-- [ ] Firestore(네이티브 모드) 생성
-- [ ] Cloud Run 서비스 생성(Hello/health)
+- [x] GCP Project 생성, Vertex AI/Gemini Live 사용 권한 확인
+- [x] Firestore(네이티브 모드) 생성
+- [x] Cloud Run 서비스 생성(Hello/health)
 - 완료 기준: Cloud Run URL 접근 + Firestore 콘솔 접근
 
 ### T0-03 Cloud Run WebSocket 엔드포인트 스켈레톤
