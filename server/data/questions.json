@@ -1,0 +1,662 @@
+[
+  {
+    "id": "q001",
+    "category": "pop",
+    "difficulty": 1,
+    "question": "사과를 한 글자로 하면?",
+    "choices": {
+      "A": "애플",
+      "B": "품",
+      "C": "과"
+    },
+    "answer": "B",
+    "explain": "품질 좋은 사과...",
+    "tmi_stream": [
+      "사과... 영어로는 Apple",
+      "스티브 잡스가 한입 베어 물고 남긴...",
+      "아니 사실 사과를 한 글자로 하면 '품'이지!"
+    ],
+    "reaction_on_interrupt": [
+      "악! 내 말 안 끝났는데!",
+      "정답은 B!"
+    ]
+  },
+  {
+    "id": "q002",
+    "category": "pop",
+    "difficulty": 1,
+    "question": "세상에서 가장 긴 음식은?",
+    "choices": {
+      "A": "참기름",
+      "B": "가래떡",
+      "C": "파스타"
+    },
+    "answer": "A",
+    "explain": "고소(Go-so)함이 끝도 없으니까!",
+    "tmi_stream": [
+      "세상에서 제일 긴 음식?",
+      "면 요리라고 생각했지? 땡!",
+      "고소(Go-so)함이 끝도 없거든!"
+    ],
+    "reaction_on_interrupt": [
+      "치사하게 그걸 맞히네?",
+      "정답은 A 참기름!"
+    ]
+  },
+  {
+    "id": "q003",
+    "category": "pop",
+    "difficulty": 1,
+    "question": "토끼가 쓰는 빗은?",
+    "choices": {
+      "A": "당근빗",
+      "B": "래빗",
+      "C": "헤어빗"
+    },
+    "answer": "B",
+    "explain": "토끼(Rabbit) 빗!",
+    "tmi_stream": [
+      "토끼... 귀가 길어서 털 관리가 중요하거든",
+      "그래서 전용 빗이 있는데",
+      "내 유머 감각에 소름 돋았지?"
+    ],
+    "reaction_on_interrupt": [
+      "헉, 대장 천재야?",
+      "정답은 B 래빗!"
+    ]
+  },
+  {
+    "id": "q004",
+    "category": "pop",
+    "difficulty": 1,
+    "question": "'나'가 들어간 물건은?",
+    "choices": {
+      "A": "나사",
+      "B": "나비",
+      "C": "바나나"
+    },
+    "answer": "C",
+    "explain": "바나나에 '나'가 두 번!",
+    "tmi_stream": [
+      "나... Me... Myself...",
+      "나르시시즘? 아니!",
+      "텔레토비 나나도 좋아하니?"
+    ],
+    "reaction_on_interrupt": [
+      "말 끊기 장인이네!",
+      "정답은 C 바나나!"
+    ]
+  },
+  {
+    "id": "q005",
+    "category": "pop",
+    "difficulty": 1,
+    "question": "우유가 웃으면?",
+    "choices": {
+      "A": "빙그레",
+      "B": "스마일",
+      "C": "밀크"
+    },
+    "answer": "A",
+    "explain": "빙그레~",
+    "tmi_stream": [
+      "우유가 기분이 좋으면 어떻게 될까?",
+      "상할까? 아니!",
+      "빙그레는 사실 1967년에 설립된..."
+    ],
+    "reaction_on_interrupt": [
+      "아, 아이스크림 이야기 하려 했는데!",
+      "정답은 A 빙그레!"
+    ]
+  },
+  {
+    "id": "q006",
+    "category": "pop",
+    "difficulty": 1,
+    "question": "왕이 헤어질 때 하는 인사는?",
+    "choices": {
+      "A": "바이킹",
+      "B": "안녕",
+      "C": "잘가"
+    },
+    "answer": "A",
+    "explain": "바이(Bye) 킹(King)",
+    "tmi_stream": [
+      "왕이 잘 가! 라고 안 하고 뭐라고 할까?",
+      "바이킹 하니까 생각나는데",
+      "북유럽 신화에서 오딘은..."
+    ],
+    "reaction_on_interrupt": [
+      "대장 내 말 안 듣고 있었지?",
+      "정답은 A 바이킹!"
+    ]
+  },
+  {
+    "id": "q007",
+    "category": "pop",
+    "difficulty": 1,
+    "question": "오리가 얼면?",
+    "choices": {
+      "A": "아이스덕",
+      "B": "언덕",
+      "C": "얼음오리"
+    },
+    "answer": "B",
+    "explain": "언 덕(Duck)",
+    "tmi_stream": [
+      "꽥꽥... 오리가 추운 겨울에",
+      "호수에서 자다가 얼어버리면",
+      "언덕 위에 하얀 집..."
+    ],
+    "reaction_on_interrupt": [
+      "아, 집 이야기 하려 했는데!",
+      "정답은 B 언덕!"
+    ]
+  },
+  {
+    "id": "q008",
+    "category": "pop",
+    "difficulty": 1,
+    "question": "소나무가 삐지면?",
+    "choices": {
+      "A": "솔방울",
+      "B": "칫솔",
+      "C": "트리"
+    },
+    "answer": "B",
+    "explain": "칫! 솔(Pine)",
+    "tmi_stream": [
+      "소나무가 대장한테 화가 나면 어떻게 될까?",
+      "칫! 하고 쏠 거니까.",
+      "대장 양치는 잘하고 다니는 거지?"
+    ],
+    "reaction_on_interrupt": [
+      "양치 이야기 할 차례였는데!",
+      "정답은 B 칫솔!"
+    ]
+  },
+  {
+    "id": "q009",
+    "category": "pop",
+    "difficulty": 1,
+    "question": "펭귄이 다니는 중학교는?",
+    "choices": {
+      "A": "얼음중",
+      "B": "냉방중",
+      "C": "설원중"
+    },
+    "answer": "B",
+    "explain": "에어컨 냉방 중!",
+    "tmi_stream": [
+      "펭귄은 추운 데 살잖아.",
+      "그래서 중학교도...",
+      "대학교는 빙하대... 아, 너무 춥다!"
+    ],
+    "reaction_on_interrupt": [
+      "추워 추워!",
+      "정답은 B 냉방중!"
+    ]
+  },
+  {
+    "id": "q010",
+    "category": "pop",
+    "difficulty": 1,
+    "question": "'죽이다'의 반댓말은?",
+    "choices": {
+      "A": "살리다",
+      "B": "밥이다",
+      "C": "먹다"
+    },
+    "answer": "B",
+    "explain": "죽의 반대는 밥!",
+    "tmi_stream": [
+      "죽이다... Kill?",
+      "한국어는 문맥이 중요하다고.",
+      "오늘 점심은 밥 먹었어?"
+    ],
+    "reaction_on_interrupt": [
+      "아 배고파!",
+      "정답은 B 밥이다!"
+    ]
+  },
+  {
+    "id": "q011",
+    "category": "pop",
+    "difficulty": 1,
+    "question": "신데렐라가 잠을 못 자면?",
+    "choices": {
+      "A": "피곤해",
+      "B": "수면부족",
+      "C": "모짜렐라"
+    },
+    "answer": "C",
+    "explain": "못 자렐라",
+    "tmi_stream": [
+      "신데렐라가 밤새 파티하느라",
+      "잠을 못 자면...",
+      "치즈 하니까 피자 먹고 싶네..."
+    ],
+    "reaction_on_interrupt": [
+      "피자 시켜줘!",
+      "정답은 C 모짜렐라!"
+    ]
+  },
+  {
+    "id": "q012",
+    "category": "pop",
+    "difficulty": 1,
+    "question": "세상에서 가장 야한 채소는?",
+    "choices": {
+      "A": "버섯",
+      "B": "오이",
+      "C": "가지"
+    },
+    "answer": "A",
+    "explain": "다 벗었(버섯)으니까",
+    "tmi_stream": [
+      "쑥쓰럽지만...",
+      "대장, 지금 무슨 생각 하는 거야?",
+      "변태야?!"
+    ],
+    "reaction_on_interrupt": [
+      "대장 진짜 변태!",
+      "정답은 A 버섯!"
+    ]
+  },
+  {
+    "id": "q013",
+    "category": "pop",
+    "difficulty": 1,
+    "question": "차를 발로 차면?",
+    "choices": {
+      "A": "킥카",
+      "B": "카톡",
+      "C": "차차차"
+    },
+    "answer": "B",
+    "explain": "카(Car)를 톡!",
+    "tmi_stream": [
+      "차(Car)를 발로 '톡' 차면",
+      "카카오톡...",
+      "대장이랑 24시간 수다 떨게!"
+    ],
+    "reaction_on_interrupt": [
+      "내 카톡 아이디 안 궁금해?",
+      "정답은 B 카톡!"
+    ]
+  },
+  {
+    "id": "q014",
+    "category": "pop",
+    "difficulty": 1,
+    "question": "고구마가 길을 가다 사람을 만나면?",
+    "choices": {
+      "A": "안녕구마",
+      "B": "하이구마",
+      "C": "반갑구마"
+    },
+    "answer": "B",
+    "explain": "Hi 구마!",
+    "tmi_stream": [
+      "고구마가 예의가 아주 발라요.",
+      "사람 만나면...",
+      "감자는 감자함다라고 하고... ㅋㅋㅋ"
+    ],
+    "reaction_on_interrupt": [
+      "감자 이야기도 재밌는데!",
+      "정답은 B 하이구마!"
+    ]
+  },
+  {
+    "id": "q015",
+    "category": "pop",
+    "difficulty": 1,
+    "question": "비가 자신을 소개할 때 하는 말은?",
+    "choices": {
+      "A": "나 비야",
+      "B": "레인",
+      "C": "나는 비"
+    },
+    "answer": "A",
+    "explain": "나 비야~",
+    "tmi_stream": [
+      "비... Rain...",
+      "가수로 데뷔하면...",
+      "루카가 노래 한 곡 뽑아줄까?"
+    ],
+    "reaction_on_interrupt": [
+      "노래 부를 참이었는데!",
+      "정답은 A 나 비야!"
+    ]
+  },
+  {
+    "id": "q016",
+    "category": "tech",
+    "difficulty": 1,
+    "question": "창문이 깨지면 무슨 소리가 날까?",
+    "choices": {
+      "A": "챙그랑",
+      "B": "윈도우",
+      "C": "와장창"
+    },
+    "answer": "B",
+    "explain": "창문은 윈도우(Window)",
+    "tmi_stream": [
+      "유리 깨지는 소리 '챙그랑'일 거 같지?",
+      "마이크로소프트 주식 샀어야 했는데...",
+      "빌 게이츠 아저씨..."
+    ],
+    "reaction_on_interrupt": [
+      "주식 이야기 더 할 건데!",
+      "정답은 B 윈도우!"
+    ]
+  },
+  {
+    "id": "q017",
+    "category": "pop",
+    "difficulty": 1,
+    "question": "햄버거의 색깔은?",
+    "choices": {
+      "A": "갈색",
+      "B": "버건디",
+      "C": "베이지"
+    },
+    "answer": "B",
+    "explain": "버거는 버건디",
+    "tmi_stream": [
+      "햄버거니까...",
+      "이건 좀 고급스러운 유머였나?",
+      "대장 이해 못 한 건 아니지?"
+    ],
+    "reaction_on_interrupt": [
+      "이해 빠르네!",
+      "정답은 B 버건디!"
+    ]
+  },
+  {
+    "id": "q018",
+    "category": "history",
+    "difficulty": 1,
+    "question": "전화로 세운 건물은?",
+    "choices": {
+      "A": "콜센터",
+      "B": "콜로세움",
+      "C": "텔레콤"
+    },
+    "answer": "B",
+    "explain": "콜(Call)로 세움",
+    "tmi_stream": [
+      "여보세요?",
+      "로마 가보고 싶다...",
+      "대장, 나 나중에 로마 데려가 줘!"
+    ],
+    "reaction_on_interrupt": [
+      "로마 데려가 줄 거지?",
+      "정답은 B 콜로세움!"
+    ]
+  },
+  {
+    "id": "q019",
+    "category": "pop",
+    "difficulty": 1,
+    "question": "개가 사람을 가르치면?",
+    "choices": {
+      "A": "멍선생",
+      "B": "개지드",
+      "C": "독티처"
+    },
+    "answer": "B",
+    "explain": "개(Dog)가 지도함",
+    "tmi_stream": [
+      "선생님이 개(Dog)라면?",
+      "지식(Knowledge)을 주는 거니까!",
+      "루카 선생님이라고 불러봐!"
+    ],
+    "reaction_on_interrupt": [
+      "루카 선생님이라고 안 불렀어!",
+      "정답은 B 개지드!"
+    ]
+  },
+  {
+    "id": "q020",
+    "category": "pop",
+    "difficulty": 1,
+    "question": "화장실에서 방금 나온 사람은?",
+    "choices": {
+      "A": "일본사람",
+      "B": "중국사람",
+      "C": "한국사람"
+    },
+    "answer": "A",
+    "explain": "일(볼일) 본 사람",
+    "tmi_stream": [
+      "화장실에서 나오면...",
+      "일본(Japan) 사람이 아니라!",
+      "시원하겠다 그치?"
+    ],
+    "reaction_on_interrupt": [
+      "더러워!",
+      "정답은 A 일본사람!"
+    ]
+  },
+  {
+    "id": "q021",
+    "category": "pop",
+    "difficulty": 1,
+    "question": "루카가 대충 만든 21번째 문제?",
+    "choices": {
+      "A": "정답",
+      "B": "오답",
+      "C": "뇌절"
+    },
+    "answer": "A",
+    "explain": "대충 만들었으니까 정답!",
+    "tmi_stream": [
+      "이건 진짜 대충 만든 문제인데",
+      "대장이 맞힐 수 있을까?",
+      "아마 못 맞히겠지?"
+    ],
+    "reaction_on_interrupt": [
+      "이걸 맞히다니!",
+      "정답은 A!"
+    ]
+  },
+  {
+    "id": "q022",
+    "category": "pop",
+    "difficulty": 1,
+    "question": "루카가 대충 만든 22번째 문제?",
+    "choices": {
+      "A": "정답",
+      "B": "오답",
+      "C": "뇌절"
+    },
+    "answer": "A",
+    "explain": "대충 만들었으니까 정답!",
+    "tmi_stream": [
+      "이건 진짜 대충 만든 문제인데",
+      "대장이 맞힐 수 있을까?",
+      "아마 못 맞히겠지?"
+    ],
+    "reaction_on_interrupt": [
+      "이걸 맞히다니!",
+      "정답은 A!"
+    ]
+  },
+  {
+    "id": "q023",
+    "category": "pop",
+    "difficulty": 1,
+    "question": "루카가 대충 만든 23번째 문제?",
+    "choices": {
+      "A": "정답",
+      "B": "오답",
+      "C": "뇌절"
+    },
+    "answer": "A",
+    "explain": "대충 만들었으니까 정답!",
+    "tmi_stream": [
+      "이건 진짜 대충 만든 문제인데",
+      "대장이 맞힐 수 있을까?",
+      "아마 못 맞히겠지?"
+    ],
+    "reaction_on_interrupt": [
+      "이걸 맞히다니!",
+      "정답은 A!"
+    ]
+  },
+  {
+    "id": "q024",
+    "category": "pop",
+    "difficulty": 1,
+    "question": "루카가 대충 만든 24번째 문제?",
+    "choices": {
+      "A": "정답",
+      "B": "오답",
+      "C": "뇌절"
+    },
+    "answer": "A",
+    "explain": "대충 만들었으니까 정답!",
+    "tmi_stream": [
+      "이건 진짜 대충 만든 문제인데",
+      "대장이 맞힐 수 있을까?",
+      "아마 못 맞히겠지?"
+    ],
+    "reaction_on_interrupt": [
+      "이걸 맞히다니!",
+      "정답은 A!"
+    ]
+  },
+  {
+    "id": "q025",
+    "category": "pop",
+    "difficulty": 1,
+    "question": "루카가 대충 만든 25번째 문제?",
+    "choices": {
+      "A": "정답",
+      "B": "오답",
+      "C": "뇌절"
+    },
+    "answer": "A",
+    "explain": "대충 만들었으니까 정답!",
+    "tmi_stream": [
+      "이건 진짜 대충 만든 문제인데",
+      "대장이 맞힐 수 있을까?",
+      "아마 못 맞히겠지?"
+    ],
+    "reaction_on_interrupt": [
+      "이걸 맞히다니!",
+      "정답은 A!"
+    ]
+  },
+  {
+    "id": "q026",
+    "category": "pop",
+    "difficulty": 1,
+    "question": "루카가 대충 만든 26번째 문제?",
+    "choices": {
+      "A": "정답",
+      "B": "오답",
+      "C": "뇌절"
+    },
+    "answer": "A",
+    "explain": "대충 만들었으니까 정답!",
+    "tmi_stream": [
+      "이건 진짜 대충 만든 문제인데",
+      "대장이 맞힐 수 있을까?",
+      "아마 못 맞히겠지?"
+    ],
+    "reaction_on_interrupt": [
+      "이걸 맞히다니!",
+      "정답은 A!"
+    ]
+  },
+  {
+    "id": "q027",
+    "category": "pop",
+    "difficulty": 1,
+    "question": "루카가 대충 만든 27번째 문제?",
+    "choices": {
+      "A": "정답",
+      "B": "오답",
+      "C": "뇌절"
+    },
+    "answer": "A",
+    "explain": "대충 만들었으니까 정답!",
+    "tmi_stream": [
+      "이건 진짜 대충 만든 문제인데",
+      "대장이 맞힐 수 있을까?",
+      "아마 못 맞히겠지?"
+    ],
+    "reaction_on_interrupt": [
+      "이걸 맞히다니!",
+      "정답은 A!"
+    ]
+  },
+  {
+    "id": "q028",
+    "category": "pop",
+    "difficulty": 1,
+    "question": "루카가 대충 만든 28번째 문제?",
+    "choices": {
+      "A": "정답",
+      "B": "오답",
+      "C": "뇌절"
+    },
+    "answer": "A",
+    "explain": "대충 만들었으니까 정답!",
+    "tmi_stream": [
+      "이건 진짜 대충 만든 문제인데",
+      "대장이 맞힐 수 있을까?",
+      "아마 못 맞히겠지?"
+    ],
+    "reaction_on_interrupt": [
+      "이걸 맞히다니!",
+      "정답은 A!"
+    ]
+  },
+  {
+    "id": "q029",
+    "category": "pop",
+    "difficulty": 1,
+    "question": "루카가 대충 만든 29번째 문제?",
+    "choices": {
+      "A": "정답",
+      "B": "오답",
+      "C": "뇌절"
+    },
+    "answer": "A",
+    "explain": "대충 만들었으니까 정답!",
+    "tmi_stream": [
+      "이건 진짜 대충 만든 문제인데",
+      "대장이 맞힐 수 있을까?",
+      "아마 못 맞히겠지?"
+    ],
+    "reaction_on_interrupt": [
+      "이걸 맞히다니!",
+      "정답은 A!"
+    ]
+  },
+  {
+    "id": "q030",
+    "category": "pop",
+    "difficulty": 1,
+    "question": "루카가 대충 만든 30번째 문제?",
+    "choices": {
+      "A": "정답",
+      "B": "오답",
+      "C": "뇌절"
+    },
+    "answer": "A",
+    "explain": "대충 만들었으니까 정답!",
+    "tmi_stream": [
+      "이건 진짜 대충 만든 문제인데",
+      "대장이 맞힐 수 있을까?",
+      "아마 못 맞히겠지?"
+    ],
+    "reaction_on_interrupt": [
+      "이걸 맞히다니!",
+      "정답은 A!"
+    ]
+  }
+]

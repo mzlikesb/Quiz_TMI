@@ -18,7 +18,7 @@ app.get("/health", (_req, res) => {
 const server = http.createServer(app);
 const wss = new WebSocketServer({ noServer: true });
 const sessions = new Map();
-const QUESTIONS_FILE_PATH = path.join(__dirname, "..", "data", "questions.json");
+const QUESTIONS_FILE_PATH = path.join(__dirname, "data", "questions.json");
 let questionBank = [];
 
 function loadQuestionBank() {
