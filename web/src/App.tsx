@@ -153,7 +153,7 @@ function App() {
         type: 'hello',
         userId,
         displayName,
-        version: 'web-ui-v1',
+        version: 'web-ui-v2',
       })
     }
 
@@ -266,13 +266,13 @@ function App() {
   }
 
   const statusClassName: Record<UiStatus, string> = {
-    Listening: 'bg-emerald-100 text-emerald-700 ring-emerald-200',
-    Speaking: 'bg-blue-100 text-blue-700 ring-blue-200',
-    Interrupted: 'bg-amber-100 text-amber-700 ring-amber-200',
-    Judging: 'bg-orange-100 text-orange-700 ring-orange-200',
-    Scored: 'bg-purple-100 text-purple-700 ring-purple-200',
-    Reconnecting: 'bg-slate-200 text-slate-700 ring-slate-300',
-    Error: 'bg-rose-100 text-rose-700 ring-rose-200',
+    Listening: 'bg-emerald-500/10 text-emerald-400 ring-emerald-500/30',
+    Speaking: 'bg-blue-500/10 text-blue-400 ring-blue-500/30',
+    Interrupted: 'bg-amber-500/10 text-amber-400 ring-amber-500/30',
+    Judging: 'bg-orange-500/10 text-orange-400 ring-orange-500/30',
+    Scored: 'bg-purple-500/10 text-purple-400 ring-purple-500/30',
+    Reconnecting: 'bg-slate-500/10 text-slate-400 ring-slate-500/30',
+    Error: 'bg-rose-500/10 text-rose-400 ring-rose-500/30',
   }
 
   const faceSprite = (() => {
@@ -284,7 +284,7 @@ function App() {
       case 'Interrupted':
         return '/sprites/face/05_shocked.png'
       case 'Scored':
-        return lastCorrect ? '/sprites/face/06_proud.png' : '/sprites/face/07_confused.png'
+        return lastCorrect ? '/sprites/face/06_proud.png' : '/sprites/face/05_shocked.png'
       case 'Error':
       case 'Reconnecting':
         return '/sprites/face/07_confused.png'
@@ -298,73 +298,89 @@ function App() {
 
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top,#164e63_0%,#0f172a_55%,#020617_100%)] px-3 py-5 text-slate-100 sm:px-5 sm:py-8">
-      <div className="mx-auto flex w-full max-w-4xl flex-col gap-5">
-        <header className="rounded-2xl border border-cyan-500/30 bg-slate-900/80 p-4 shadow-[0_0_0_1px_rgba(6,182,212,0.14),0_20px_40px_rgba(2,6,23,0.45)] backdrop-blur">
+      <div className="mx-auto flex w-full max-w-4xl flex-col gap-3">
+        {/* Header Card */}
+        <header className="rounded-2xl ring-1 ring-white/5 bg-white/5 p-4 shadow-xl backdrop-blur-lg">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <h1 className="text-2xl font-black tracking-tight sm:text-3xl">Interruption Quiz</h1>
+            <h1 className="text-2xl font-black tracking-tight sm:text-3xl">Quiz TMI</h1>
             <span className={`rounded-full px-4 py-1 text-sm font-semibold ring-1 ${statusClassName[status]}`}>
               {status}
             </span>
           </div>
-          <p className="mt-2 text-xs text-slate-400 sm:text-sm">
-            userId: <span className="font-mono">{userId}</span> | displayName:{' '}
-            <span className="font-mono">{displayName}</span>
-          </p>
+          <details className="mt-2 group">
+            <summary className="cursor-pointer text-xs text-slate-500 hover:text-slate-300 transition-colors">
+              Session Info
+            </summary>
+            <p className="mt-2 text-xs text-slate-400 sm:text-sm font-mono bg-black/20 p-2 rounded">
+              ID: {userId} | User: {displayName}
+            </p>
+          </details>
         </header>
 
-        <section className="rounded-2xl border border-slate-700 bg-slate-900/80 p-4 shadow-lg backdrop-blur">
-          <div className="relative mx-auto w-full max-w-[320px] overflow-hidden">
-            <img src={faceSprite} alt={`Luca ${status}`} className="mx-auto block h-auto w-full select-none" />
-            {scorePopupSprite ? (
+        {/* Success/Fail Image Section */}
+        <section className={`transition-all duration-300 ${status === 'Scored' ? 'h-24 opacity-100' : 'h-0 opacity-0 invisible'}`}>
+           {scorePopupSprite && (
               <img
                 src={scorePopupSprite}
                 alt={lastCorrect ? 'Correct' : 'Fail'}
-                className="pointer-events-none absolute -top-3 left-1/2 h-auto w-[58%] max-w-[180px] -translate-x-1/2 select-none object-contain"
+                className="mx-auto h-24 w-full max-w-[240px] object-contain select-none"
               />
-            ) : null}
+           )}
+        </section>
+
+        {/* Avatar Section */}
+        <section className="rounded-2xl ring-1 ring-white/5 bg-white/5 p-4 shadow-xl backdrop-blur-lg">
+          <div className="relative mx-auto w-full max-w-[320px] overflow-hidden">
+            <img 
+              src={faceSprite} 
+              alt={`Luca ${status}`} 
+              className="mx-auto block w-full max-h-[180px] sm:max-h-none object-contain select-none" 
+            />
           </div>
         </section>
 
-        <section className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          <div className="rounded-2xl border border-slate-700 bg-slate-900/80 p-4 text-center shadow-lg backdrop-blur">
-            <p className="text-sm text-slate-400">Total</p>
-            <p className="mt-1 text-3xl font-black">{score.total}</p>
+        {/* Score Cards */}
+        <section className="grid grid-cols-3 gap-2 sm:gap-3">
+          <div className="rounded-2xl ring-1 ring-white/5 bg-white/5 p-2 sm:p-4 text-center shadow-xl backdrop-blur-lg">
+            <p className="text-[10px] sm:text-sm text-slate-400 uppercase tracking-wider">Total</p>
+            <p className="mt-1 text-2xl sm:text-3xl font-black">{score.total}</p>
           </div>
-          <div className="rounded-2xl border border-slate-700 bg-slate-900/80 p-4 text-center shadow-lg backdrop-blur">
-            <p className="text-sm text-slate-400">Best</p>
-            <p className="mt-1 text-3xl font-black">{score.best}</p>
+          <div className="rounded-2xl ring-1 ring-white/5 bg-white/5 p-2 sm:p-4 text-center shadow-xl backdrop-blur-lg">
+            <p className="text-[10px] sm:text-sm text-slate-400 uppercase tracking-wider">Best</p>
+            <p className="mt-1 text-2xl sm:text-3xl font-black">{score.best}</p>
           </div>
-          <div className="rounded-2xl border border-slate-700 bg-slate-900/80 p-4 text-center shadow-lg backdrop-blur">
-            <p className="text-sm text-slate-400">Delta</p>
-            <p className="mt-1 text-3xl font-black">{score.delta >= 0 ? `+${score.delta}` : score.delta}</p>
+          <div className="rounded-2xl ring-1 ring-white/5 bg-white/5 p-2 sm:p-4 text-center shadow-xl backdrop-blur-lg">
+            <p className="text-[10px] sm:text-sm text-slate-400 uppercase tracking-wider">Delta</p>
+            <p className="mt-1 text-2xl sm:text-3xl font-black">{score.delta >= 0 ? `+${score.delta}` : score.delta}</p>
           </div>
         </section>
 
-        <section className="rounded-2xl border border-slate-700 bg-slate-900/85 p-4 shadow-lg backdrop-blur">
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        {/* Action Buttons Container */}
+        <section className="sticky bottom-0 z-10 -mx-3 -mb-5 mt-auto space-y-3 bg-white/5 p-4 backdrop-blur-lg sm:static sm:mx-0 sm:mb-0 sm:mt-0 sm:rounded-2xl sm:ring-1 sm:ring-white/5 sm:shadow-xl">
+          <div className="grid grid-cols-2 gap-3">
             <button
               type="button"
               onClick={handleStartRun}
-              className="min-h-14 w-full rounded-xl border-2 border-emerald-200/70 bg-emerald-500 px-5 py-4 text-lg font-black text-white shadow-[0_8px_0_#14532d] transition hover:bg-emerald-400 active:translate-y-[1px]"
+              className="min-h-12 w-full rounded-xl border-b-4 border-blue-700 bg-blue-500 px-5 py-3 text-lg font-black text-white transition hover:brightness-110 active:translate-y-[2px] active:border-b-0"
             >
               Start Run
             </button>
             <button
               type="button"
               onClick={handleStopReset}
-              className="min-h-14 w-full rounded-xl border-2 border-rose-200/70 bg-rose-500 px-5 py-4 text-lg font-black text-white shadow-[0_8px_0_#7f1d1d] transition hover:bg-rose-400 active:translate-y-[1px]"
+              className="min-h-12 w-full rounded-xl border-b-4 border-red-700 bg-red-600 px-5 py-3 text-lg font-black text-white transition hover:brightness-110 active:translate-y-[2px] active:border-b-0"
             >
-              Stop / Reset
+              Stop
             </button>
           </div>
 
-          <div className="mt-3 grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-3 gap-3">
             {(['A', 'B', 'C'] as const).map((choice) => (
               <button
                 key={choice}
                 type="button"
                 onClick={() => handleAnswer(choice)}
-                className="min-h-[4.5rem] w-full rounded-xl border-2 border-cyan-200/70 bg-cyan-500 px-4 py-4 text-3xl font-black text-slate-950 shadow-[0_8px_0_#155e75] transition hover:bg-cyan-400 active:translate-y-[1px]"
+                className="min-h-[4rem] w-full rounded-xl border-b-4 border-cyan-700 bg-cyan-500 px-4 py-3 text-3xl font-black text-slate-950 transition hover:brightness-110 active:translate-y-[2px] active:border-b-0"
               >
                 {choice}
               </button>
@@ -374,22 +390,23 @@ function App() {
           <button
             type="button"
             onClick={handleSimulateDrop}
-            className="mt-3 min-h-12 w-full rounded-xl border-2 border-slate-500 bg-slate-700 px-5 py-3 text-base font-bold text-slate-100 transition hover:bg-slate-600"
+            className="w-full text-xs font-bold text-slate-500 transition hover:text-slate-300"
           >
-            Simulate Drop
+            Simulate Connection Drop
           </button>
         </section>
 
-        <section className="rounded-2xl border border-slate-700 bg-slate-900/85 p-4 shadow-lg backdrop-blur">
-          <h2 className="text-lg font-semibold">Event Timeline (Last 10)</h2>
+        {/* Timeline Section */}
+        <section className="rounded-2xl ring-1 ring-white/5 bg-white/5 p-4 shadow-xl backdrop-blur-lg">
+          <h2 className="text-sm font-semibold text-slate-400">Timeline</h2>
           <ul className="mt-3 space-y-2">
             {timeline.length === 0 ? (
-              <li className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-500">No events yet.</li>
+              <li className="text-xs text-slate-600">Waiting for events...</li>
             ) : (
               timeline.map((item) => (
-                <li key={item.id} className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2">
-                  <span className="mr-2 font-mono text-xs text-slate-500">{item.timestamp}</span>
-                  <span className="text-sm text-slate-200">{item.message}</span>
+                <li key={item.id} className="flex gap-2 text-xs border-b border-white/5 pb-1 last:border-0">
+                  <span className="font-mono text-slate-500 whitespace-nowrap">{item.timestamp}</span>
+                  <span className="text-slate-300 truncate">{item.message}</span>
                 </li>
               ))
             )}
