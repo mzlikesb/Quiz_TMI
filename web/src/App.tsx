@@ -114,6 +114,10 @@ class AudioQueue {
     return this.ctx
   }
 
+  init() {
+    this.getCtx()
+  }
+
   enqueue(base64: string) {
     // base64 → ArrayBuffer → Int16 → Float32
     const binary = atob(base64)
@@ -313,10 +317,12 @@ function App() {
   }, [status])
 
   const handleStartRun = () => {
+    audioQueue.init()
     sendJson({ type: 'start_run' })
   }
 
   const handleStopReset = () => {
+    audioQueue.flush()
     sendJson({ type: 'stop_reset' })
     setScore({ total: 0, best: 0, delta: 0 })
     setStatus(wsRef.current?.readyState === WebSocket.OPEN ? 'Listening' : 'Reconnecting')
