@@ -11,9 +11,9 @@ async function getSdk() {
   return _sdk;
 }
 
-const PROJECT  = process.env.GOOGLE_CLOUD_PROJECT;
-const LOCATION = process.env.GOOGLE_CLOUD_LOCATION || 'us-central1';
-const MODEL_ID = process.env.GEMINI_LIVE_MODEL   || 'gemini-live-2.5-flash-native-audio';
+const PROJECT  = process.env.GOOGLE_CLOUD_PROJECT || process.env.GCP_PROJECT_ID;
+const LOCATION = process.env.GOOGLE_CLOUD_LOCATION || process.env.VERTEX_LOCATION || 'us-central1';
+const MODEL_ID = process.env.GEMINI_LIVE_MODEL || process.env.GEMINI_MODEL || 'gemini-2.0-flash-exp';
 
 const LUCA_SYSTEM_PROMPT = `
 너는 루카. 
