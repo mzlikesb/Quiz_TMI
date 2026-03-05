@@ -1,6 +1,6 @@
 #!/bin/bash
 PROJECT_ID="gemini-agent-challenge-489100"
-REGION="us-central1"
+REGION="us-east1"
 SERVICE_NAME="quiz-tmi"
 
 echo "Deploying to Cloud Run: $SERVICE_NAME..."
