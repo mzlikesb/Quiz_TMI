@@ -96,17 +96,15 @@ function toNumber(value: unknown, fallback: number): number {
   return fallback
 }
 
-// ─── PCM16 오디오 재생 큐 ────────────────────────────────────────────────────
-class AudioQueue {
+// ─── PCM16 오디오 재생 플레이어 (24kHz) ──────────────────────────────────────────
+class PcmPlayer {
   private ctx: AudioContext | null = null
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private queue: any[] = []
-  private playing = false
-  private nextStartTime = 0
+  private queueTime = 0
+  private sources: AudioBufferSourceNode[] = []
 
   private getCtx(): AudioContext {
     if (!this.ctx || this.ctx.state === 'closed') {
-      this.ctx = new AudioContext({ sampleRate: 24000 })
+      this.ctx = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 48000 })
     }
     if (this.ctx.state === 'suspended') {
       this.ctx.resume()
@@ -116,48 +114,55 @@ class AudioQueue {
 
   init() {
     this.getCtx()
+    this.queueTime = this.getCtx().currentTime
   }
 
-  enqueue(base64: string) {
+  playPcm16Base64(base64: string, sampleRate = 24000) {
+    const ctx = this.getCtx()
+    
     // base64 → ArrayBuffer → Int16 → Float32
     const binary = atob(base64)
     const bytes = new Uint8Array(binary.length)
     for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i)
-    const int16 = new Int16Array(bytes.buffer)
-    const float32 = new Float32Array(int16.length)
-    for (let i = 0; i < int16.length; i++) float32[i] = int16[i] / 32768
-    this.queue.push(float32)
-    if (!this.playing) this._pump()
-  }
+    const pcm = new Int16Array(bytes.buffer)
+    
+    const float32 = new Float32Array(pcm.length)
+    for (let i = 0; i < pcm.length; i++) float32[i] = pcm[i] / 32768
 
-  private _pump() {
-    if (this.queue.length === 0) { this.playing = false; return }
-    this.playing = true
-    const ctx = this.getCtx()
-    const samples = this.queue.shift()!
-    const buf = ctx.createBuffer(1, samples.length, 24000)
-    buf.copyToChannel(samples, 0)
+    // AudioBuffer 생성 (24k로 생성, 48k context에서 자동 리샘플링)
+    const buf = ctx.createBuffer(1, float32.length, sampleRate)
+    buf.copyToChannel(float32, 0)
+
     const src = ctx.createBufferSource()
     src.buffer = buf
     src.connect(ctx.destination)
-    const startAt = Math.max(ctx.currentTime, this.nextStartTime)
+
+    const startAt = Math.max(this.queueTime, ctx.currentTime)
     src.start(startAt)
-    this.nextStartTime = startAt + buf.duration
-    src.onended = () => this._pump()
+    this.queueTime = startAt + buf.duration
+    this.sources.push(src)
+
+    src.onended = () => {
+      this.sources = this.sources.filter((s) => s !== src)
+    }
+  }
+
+  stop() {
+    for (const s of this.sources) {
+      try { s.stop() } catch {}
+    }
+    this.sources = []
+    if (this.ctx) {
+      this.queueTime = this.ctx.currentTime
+    }
   }
 
   flush() {
-    this.queue = []
-    this.playing = false
-    this.nextStartTime = 0
-    if (this.ctx && this.ctx.state !== 'closed') {
-      this.ctx.close()
-      this.ctx = null
-    }
+    this.stop()
   }
 }
 
-const audioQueue = new AudioQueue()
+const audioPlayer = new PcmPlayer()
 // ──────────────────────────────────────────────────────────────────────────────
 
 function App() {
@@ -235,10 +240,15 @@ function App() {
           return
         }
 
+        if (type === 'stop_playback') {
+          audioPlayer.stop()
+          return
+        }
+
         if (type === 'audio_out_chunk') {
           const data = payload.data as string | undefined
           if (data) {
-            audioQueue.enqueue(data)
+            audioPlayer.playPcm16Base64(data, toNumber(payload.sampleRate, 24000))
           }
           return
         }
@@ -317,12 +327,12 @@ function App() {
   }, [status])
 
   const handleStartRun = () => {
-    audioQueue.init()
+    audioPlayer.init()
     sendJson({ type: 'start_run' })
   }
 
   const handleStopReset = () => {
-    audioQueue.flush()
+    audioPlayer.flush()
     sendJson({ type: 'stop_reset' })
     setScore({ total: 0, best: 0, delta: 0 })
     setStatus(wsRef.current?.readyState === WebSocket.OPEN ? 'Listening' : 'Reconnecting')
@@ -331,7 +341,7 @@ function App() {
 
   const handleAnswer = (answer: 'A' | 'B' | 'C') => {
     // 즉시 로컬 오디오 중단 (체감 지연 최소화)
-    audioQueue.flush()
+    audioPlayer.flush()
     sendJson({ type: 'barge_in', answer })
   }
 

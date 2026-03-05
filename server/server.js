@@ -180,6 +180,7 @@ function handleMessage(ws, raw) {
         },
         onInterrupted: () => {
           logEvent("live_interrupted", { runId, userId: session.userId });
+          sendFrame(ws, "stop_playback");
         },
         onDone: (err) => {
           if (err) {
