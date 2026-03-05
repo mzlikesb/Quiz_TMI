@@ -2,7 +2,7 @@ import { initializeApp } from 'firebase/app'
 import { getAnalytics, isSupported } from 'firebase/analytics'
 
 export const firebaseConfig = {
-  apiKey: 'AIzaSyCZkYg5ixHpno7WOzOJtUQXyvyDB2uGryA',
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: 'quiz-tmi.firebaseapp.com',
   projectId: 'quiz-tmi',
   storageBucket: 'quiz-tmi.firebasestorage.app',
