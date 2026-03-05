@@ -63,6 +63,12 @@ async function startLiveSpeak({ text, onAudioChunk, onInterrupted, onDone }) {
         let msg;
         try {
           msg = JSON.parse(raw);
+          // 디버그: 메시지 수신 로깅
+          console.log(JSON.stringify({ 
+            severity: 'INFO', 
+            event: 'live_msg_received', 
+            keys: Object.keys(msg || {}).join(',')
+          }));
         } catch (e) {
           // JSON이 아니면 SDK 내부의 다른 메시지(바이너리 등)일 가능성이 높음
           return;
@@ -81,6 +87,12 @@ async function startLiveSpeak({ text, onAudioChunk, onInterrupted, onDone }) {
         for (const p of parts) {
           const inline = p.inlineData ?? p.inline_data;
           if (inline?.data) {
+            // 디버그: 오디오 청크 수신 로깅
+            console.log(JSON.stringify({ 
+              severity: 'INFO', 
+              event: 'audio_chunk_received', 
+              size: inline.data.length 
+            }));
             onAudioChunk?.({
               data: inline.data,
               sampleRate: 24000,
