@@ -15,7 +15,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@google/genai": "^1.43.0",
+    "@google-cloud/firestore": "^8.3.0",
+    "@google/genai": "^1.44.0",
     "express": "^4.21.2",
     "ws": "^8.18.3"
   },
