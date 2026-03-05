@@ -52,7 +52,21 @@ async function startLiveSpeak({ text, onAudioChunk, onInterrupted, onDone }) {
       onmessage: (evt) => {
         if (closed) return;
         const raw = evt?.data ?? evt;
-        const msg = typeof raw === 'string' ? JSON.parse(raw) : raw;
+        
+        // 중요: Vertex AI SDK는 오디오 바이너리(Blob)를 직접 보낼 수 있음.
+        // JSON이 아닌 데이터는 파싱하지 않고 무시하거나 처리 루직 필요.
+        if (typeof raw !== 'string' && !(raw instanceof String)) {
+          // 바이너리 데이터(오디오 등)인 경우
+          return;
+        }
+
+        let msg;
+        try {
+          msg = JSON.parse(raw);
+        } catch (e) {
+          // JSON이 아니면 SDK 내부의 다른 메시지(바이너리 등)일 가능성이 높음
+          return;
+        }
 
         // 1) interrupted 신호
         const interrupted = msg?.serverContent?.interrupted ?? msg?.server_content?.interrupted;
