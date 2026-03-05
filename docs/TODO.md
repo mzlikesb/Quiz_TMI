@@ -44,26 +44,26 @@ Interruption Quiz — Web + Cloud Run Implementation Tasks (Minimal)
 - [x] `question_meta`를 클라이언트로 전송
 - 완료 기준: Web UI에 `qId/runId` 표시됨
 
-### T0-07 Gemini Live 연결(서버) + 루카 음성 출력(클라 재생)
+- [x] T0-07 Gemini Live 연결(서버) + 루카 음성 출력(클라 재생)
 - [ ] Cloud Run에서 Live 세션 열고 “문제+선택지+뇌절” 말하게 함
 - [ ] Live 오디오 출력 스트림을 Web로 전달(`audio_out_chunk`)
 - [ ] Web `AudioOut` 큐 재생 구현
 - 완료 기준: 루카 음성이 Web UI에서 들린다(지연이 크더라도 OK)
 
-### T0-08 barge-in 핵심(로컬 즉시 stop + 서버 답 제출)
+- [x] T0-08 barge-in 핵심(로컬 즉시 stop + 서버 답 제출)
 - [ ] Web: `Speaking` 중 사용자 입력(A/B/C 버튼) → **즉시 AudioSource.Stop + 큐 Clear**
 - [ ] 서버로 `barge_in(answer, t_ms)` 전송
 - [ ] UI 상태 전이: `Speaking → Interrupted → Judging`
 - 완료 기준: 버튼으로 barge-in이 확실히 “뚝” 끊김
 
-### T0-09 채점/점수 계산(서버) + Firestore 저장
+- [x] T0-09 채점/점수 계산(서버) + Firestore 저장
 - [ ] 서버: `elapsed_ms` 계산( startedAt 기준)
 - [ ] 정답 비교 + 점수(delta/total) 계산
 - [ ] Firestore `scores/{userId}` 업데이트(누적/최고/횟수)
 - [ ] Web: `score` 수신 → `Scored` 표시 + 누적 점수 갱신
 - 완료 기준: Firestore 문서가 실제로 업데이트되고 Web UI에 반영됨
 
-### T0-10 루카 리액션(서버) + 다음 라운드 준비
+- [x] T0-10 루카 리액션(서버) + 다음 라운드 준비
 - [ ] 채점 후 루카가 짧은 리액션 + “오케이 채점!” 출력(짧게)
 - [ ] 데모는 2문제만 반복되면 충분(연속 라운드 2회)
 - 완료 기준: barge-in 2회 시나리오가 끊김 없이 연속 재현
