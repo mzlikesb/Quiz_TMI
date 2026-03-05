@@ -3,6 +3,10 @@
 
 let _sdk = null;
 
+function logEvent(event, data = {}) {
+  console.log(JSON.stringify({ severity: 'INFO', event, ...data, ts: new Date().toISOString() }));
+}
+
 async function getSdk() {
   if (_sdk) return _sdk;
   // @google/genai is ESM-only, use dynamic import from CJS
@@ -52,7 +56,16 @@ async function startLiveSpeak({ text, onAudioChunk, onInterrupted, onDone }) {
       onmessage: (evt) => {
         if (closed) return;
         const raw = evt?.data ?? evt;
-        const msg = typeof raw === 'string' ? JSON.parse(raw) : raw;
+        let msg;
+        try {
+          msg = typeof raw === 'string' ? JSON.parse(raw) : raw;
+        } catch (e) {
+          logEvent("live_msg_parse_error", { raw: String(raw).slice(0, 200) });
+          return;
+        }
+
+        // 디버그: raw 메시지 최상위 키 기록
+        logEvent("live_msg_keys", { keys: Object.keys(msg || {}).join(',') });
 
         // 1) interrupted 신호
         const interrupted =
@@ -61,15 +74,17 @@ async function startLiveSpeak({ text, onAudioChunk, onInterrupted, onDone }) {
           onInterrupted?.();
         }
 
-        // 2) 오디오 청크
+        // 2) 오디오 청크 — Vertex AI SDK 다중 경로 탐색
         const parts =
           msg?.serverContent?.modelTurn?.parts ??
           msg?.server_content?.model_turn?.parts ??
+          msg?.data?.serverContent?.modelTurn?.parts ??
           [];
 
         for (const p of parts) {
           const inline = p.inlineData ?? p.inline_data;
           if (inline?.data) {
+            logEvent("audio_chunk_received", { size: inline.data.length });
             onAudioChunk?.({
               data: inline.data,
               sampleRate: 24000,
@@ -83,6 +98,7 @@ async function startLiveSpeak({ text, onAudioChunk, onInterrupted, onDone }) {
         const turnComplete =
           msg?.serverContent?.turnComplete ?? msg?.server_content?.turn_complete;
         if (turnComplete && !closed) {
+          logEvent("live_turn_complete", {});
           closed = true;
           try { session.close(); } catch {}
           onDone?.();
@@ -97,7 +113,8 @@ async function startLiveSpeak({ text, onAudioChunk, onInterrupted, onDone }) {
         onDone?.(e);
       },
 
-      onclose: () => {
+      onclose: (e) => {
+        logEvent("live_session_closed", { code: e?.code, reason: e?.reason, wasClean: e?.wasClean });
         if (!closed) {
           closed = true;
           onDone?.();
