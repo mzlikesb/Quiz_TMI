@@ -36,7 +36,7 @@ function resolveWsUrl(): string {
     return 'ws://localhost:8080/ws'
   }
 
-  return 'wss://quiz-tmi-801541606537.us-central1.run.app/ws'
+  return 'wss://quiz-tmi-801541606537.us-east1.run.app/ws'
 }
 
 const WS_URL = resolveWsUrl()
