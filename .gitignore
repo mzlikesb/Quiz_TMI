@@ -1,0 +1,8 @@
+.env
+.env.local
+.env*.local
+node_modules/
+server/node_modules/
+web/node_modules/
+web/dist/
+dist/
