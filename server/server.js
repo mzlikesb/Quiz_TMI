@@ -178,6 +178,14 @@ function handleMessage(ws, raw) {
           // 비동기로 handle이 반환됨 — 아직 run이 유효하면 저장
           if (session.currentRunId === runId) {
             session.liveSession = handle;
+            // Issue #5: 60초 후 세션 자동 종료 타임아웃
+            setTimeout(() => {
+              if (session.liveSession === handle) {
+                logEvent("live_timeout", { runId, userId: session.userId });
+                try { handle.close(); } catch {}
+                session.liveSession = null;
+              }
+            }, 60000);
           } else {
             // 이미 barge_in이 왔으면 즉시 닫기
             try { handle.close(); } catch {}
@@ -244,13 +252,16 @@ function handleMessage(ws, raw) {
       });
       break;
     }
-    case "simulate_drop": {
-      logEvent("simulate_drop", {
-        runId: session.currentRunId,
-        userId: session.userId,
-      });
-      sendFrame(ws, "state", { state: "disconnecting", reason: "simulate_drop" });
-      ws.close(4000, "simulate_drop");
+    case "stop_reset": {
+      if (session.liveSession) {
+        try { session.liveSession.close(); } catch {}
+        session.liveSession = null;
+      }
+      session.currentRunId = null;
+      session.currentQuestion = null;
+      session.answered = false;
+      logEvent("stop_reset", { userId: session.userId });
+      sendFrame(ws, "state", { state: "listening" });
       break;
     }
     default: {
