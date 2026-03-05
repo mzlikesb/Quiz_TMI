@@ -19,6 +19,7 @@ app.get("/health", (_req, res) => {
 const server = http.createServer(app);
 const wss = new WebSocketServer({ noServer: true, maxPayload: 1024 * 10 }); // Issue #7: 10KB 제한
 const sessions = new Map();
+const userScores = new Map(); // Issue #4: 영구 점수 저장용
 const QUESTIONS_FILE_PATH = path.join(__dirname, "data", "questions.json");
 let questionBank = [];
 
@@ -104,6 +105,7 @@ function handleMessage(ws, raw) {
         state: "connected",
         userId: session.userId,
         displayName: session.displayName,
+        score: userScores.get(session.userId) || { total: 0, best: 0 },
       });
       break;
     }
@@ -252,11 +254,18 @@ function handleMessage(ws, raw) {
 
       sendFrame(ws, "state", { state: "interrupted", runId: session.currentRunId });
       sendFrame(ws, "state", { state: "judging", runId: session.currentRunId });
+      // Issue #4: 서버에서 점수 계산 및 저장
+      const currentScore = userScores.get(session.userId) || { total: 0, best: 0 };
+      currentScore.total += delta;
+      currentScore.best = Math.max(currentScore.best, currentScore.total);
+      userScores.set(session.userId, currentScore);
       sendFrame(ws, "score", {
         runId: session.currentRunId,
         correct,
         delta,
         elapsed_ms: elapsedMs,
+        total: userScores.get(session.userId).total,
+        best: userScores.get(session.userId).best,
       });
       break;
     }
