@@ -64,8 +64,11 @@ async function startLiveSpeak({ text, onAudioChunk, onInterrupted, onDone }) {
           return;
         }
 
-        // 디버그: raw 메시지 최상위 키 기록
-        logEvent("live_msg_keys", { keys: Object.keys(msg || {}).join(',') });
+        // 디버그: 모든 메시지 내용 상세 기록 (개인정보 주의)
+        logEvent("live_msg_received", { 
+          keys: Object.keys(msg || {}).join(','),
+          serverContentKeys: msg?.serverContent ? Object.keys(msg.serverContent).join(',') : null
+        });
 
         // 1) interrupted 신호
         const interrupted =
