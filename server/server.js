@@ -4,6 +4,7 @@ const path = require("path");
 const express = require("express");
 const { WebSocketServer } = require("ws");
 const { startLiveSpeak } = require("./live");
+const { updateScore, getScore, saveRun } = require("./firestore");
 
 const PORT = Number(process.env.PORT || 8080);
 const app = express();
@@ -17,9 +18,8 @@ app.get("/health", (_req, res) => {
 });
 
 const server = http.createServer(app);
-const wss = new WebSocketServer({ noServer: true });
+const wss = new WebSocketServer({ noServer: true, maxPayload: 1024 * 10 }); // Issue #7: 10KB 제한
 const sessions = new Map();
-const userScores = new Map(); // Issue #4: 영구 점수 저장용
 const QUESTIONS_FILE_PATH = path.join(__dirname, "data", "questions.json");
 let questionBank = [];
 
@@ -70,6 +70,7 @@ function getOrCreateSession(ws) {
       questionStartedAtMs: null,
       currentQuestion: null,
       answered: false,
+      lastRunAtMs: 0,
       isAlive: true,
       liveSession: null,   // Gemini Live 세션 핸들
     });
@@ -100,15 +101,31 @@ function handleMessage(ws, raw) {
         version: session.version,
       });
 
-      sendFrame(ws, "state", {
-        state: "connected",
-        userId: session.userId,
-        displayName: session.displayName,
-        score: userScores.get(session.userId) || { total: 0, best: 0 },
+      // Firestore에서 기존 점수 불러오기
+      getScore(session.userId).then((s) => {
+        sendFrame(ws, "state", {
+          state: "connected",
+          userId: session.userId,
+          displayName: session.displayName,
+          score: { total: s.totalScore, best: s.bestScore, plays: s.plays },
+        });
+      }).catch(() => {
+        sendFrame(ws, "state", {
+          state: "connected",
+          userId: session.userId,
+          displayName: session.displayName,
+        });
       });
       break;
     }
     case "start_run": {
+      // Issue #8: start_run 스팸 방지 (3초 쿨다운)
+      const now = Date.now();
+      if (session.lastRunAtMs && now - session.lastRunAtMs < 3000) {
+        sendFrame(ws, "state", { state: "error", reason: "rate_limit_exceeded" });
+        return;
+      }
+      session.lastRunAtMs = now;
       // 이전 Live 세션 정리
       if (session.liveSession) {
         try { session.liveSession.close(); } catch {}
@@ -180,6 +197,14 @@ function handleMessage(ws, raw) {
           // 비동기로 handle이 반환됨 — 아직 run이 유효하면 저장
           if (session.currentRunId === runId) {
             session.liveSession = handle;
+            // Issue #5: 60초 후 세션 자동 종료 타임아웃
+            setTimeout(() => {
+              if (session.liveSession === handle) {
+                logEvent("live_timeout", { runId, userId: session.userId });
+                try { handle.close(); } catch {}
+                session.liveSession = null;
+              }
+            }, 60000);
           } else {
             // 이미 barge_in이 왔으면 즉시 닫기
             try { handle.close(); } catch {}
@@ -238,28 +263,82 @@ function handleMessage(ws, raw) {
 
       sendFrame(ws, "state", { state: "interrupted", runId: session.currentRunId });
       sendFrame(ws, "state", { state: "judging", runId: session.currentRunId });
-      // Issue #4: 서버에서 점수 계산 및 저장
-      const currentScore = userScores.get(session.userId) || { total: 0, best: 0 };
-      currentScore.total += delta;
-      currentScore.best = Math.max(currentScore.best, currentScore.total);
-      userScores.set(session.userId, currentScore);
-      sendFrame(ws, "score", {
-        runId: session.currentRunId,
-        correct,
-        delta,
-        elapsed_ms: elapsedMs,
-        total: userScores.get(session.userId).total,
-        best: userScores.get(session.userId).best,
-      });
+
+      const savedRunId = session.currentRunId;
+      const savedQuestion = session.currentQuestion;
+
+      // T0-09: Firestore 점수 저장 + run 로그
+      Promise.all([
+        updateScore(session.userId, delta, correct),
+        saveRun({
+          runId: savedRunId,
+          userId: session.userId,
+          qId: savedQuestion.id,
+          answer,
+          correct,
+          elapsedMs,
+          scoreDelta: delta,
+        }),
+      ])
+        .then(([scoreData]) => {
+          const total = scoreData.totalScore;
+          const best  = scoreData.bestScore;
+          logEvent("score_saved", { runId: savedRunId, userId: session.userId, total, best });
+
+          sendFrame(ws, "score", {
+            runId: savedRunId,
+            correct,
+            delta,
+            elapsed_ms: elapsedMs,
+            total,
+            best,
+          });
+          sendFrame(ws, "state", { state: "scored", runId: savedRunId });
+
+          // T0-10: 루카 리액션 (짧게 말하기)
+          const reactionText = correct
+            ? `정답이야! ${savedQuestion.answer}번! 역시 빠르네~`
+            : `땡! 정답은 ${savedQuestion.answer}번이었어. 다음엔 더 빨리 끊어봐!`;
+
+          startLiveSpeak({
+            text: reactionText,
+            onAudioChunk: ({ data, mimeType }) => {
+              if (ws.readyState !== ws.OPEN) return;
+              sendFrame(ws, "audio_out_chunk", { runId: savedRunId, data, mimeType, sampleRate: 24000, codec: 'pcm16' });
+            },
+            onInterrupted: () => {},
+            onDone: () => {
+              logEvent("reaction_done", { runId: savedRunId, userId: session.userId });
+            },
+          }).then((handle) => {
+            // Issue #2: 리액션 세션 핸들도 세션에 저장하여 관리
+            if (session.currentRunId === savedRunId) {
+              session.liveSession = handle;
+            } else {
+              try { handle.close(); } catch {}
+            }
+          }).catch((err) => {
+            logEvent("reaction_error", { runId: savedRunId, message: err?.message });
+          });
+        })
+        .catch((err) => {
+          logEvent("firestore_error", { runId: savedRunId, userId: session.userId, message: err?.message });
+          // Firestore 실패해도 클라에는 점수 전송
+          sendFrame(ws, "score", { runId: savedRunId, correct, delta, elapsed_ms: elapsedMs });
+          sendFrame(ws, "state", { state: "scored", runId: savedRunId });
+        });
       break;
     }
-    case "simulate_drop": {
-      logEvent("simulate_drop", {
-        runId: session.currentRunId,
-        userId: session.userId,
-      });
-      sendFrame(ws, "state", { state: "disconnecting", reason: "simulate_drop" });
-      ws.close(4000, "simulate_drop");
+    case "stop_reset": {
+      if (session.liveSession) {
+        try { session.liveSession.close(); } catch {}
+        session.liveSession = null;
+      }
+      session.currentRunId = null;
+      session.currentQuestion = null;
+      session.answered = false;
+      logEvent("stop_reset", { userId: session.userId });
+      sendFrame(ws, "state", { state: "listening" });
       break;
     }
     default: {
