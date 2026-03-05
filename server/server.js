@@ -17,7 +17,7 @@ app.get("/health", (_req, res) => {
 });
 
 const server = http.createServer(app);
-const wss = new WebSocketServer({ noServer: true });
+const wss = new WebSocketServer({ noServer: true, maxPayload: 1024 * 10 }); // Issue #7: 10KB 제한
 const sessions = new Map();
 const QUESTIONS_FILE_PATH = path.join(__dirname, "data", "questions.json");
 let questionBank = [];
@@ -69,6 +69,7 @@ function getOrCreateSession(ws) {
       questionStartedAtMs: null,
       currentQuestion: null,
       answered: false,
+      lastRunAtMs: 0,
       isAlive: true,
       liveSession: null,   // Gemini Live 세션 핸들
     });
@@ -107,6 +108,13 @@ function handleMessage(ws, raw) {
       break;
     }
     case "start_run": {
+      // Issue #8: start_run 스팸 방지 (3초 쿨다운)
+      const now = Date.now();
+      if (session.lastRunAtMs && now - session.lastRunAtMs < 3000) {
+        sendFrame(ws, "state", { state: "error", reason: "rate_limit_exceeded" });
+        return;
+      }
+      session.lastRunAtMs = now;
       // 이전 Live 세션 정리
       if (session.liveSession) {
         try { session.liveSession.close(); } catch {}
