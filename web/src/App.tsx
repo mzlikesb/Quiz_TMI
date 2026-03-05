@@ -1,4 +1,3 @@
-import type { ButtonHTMLAttributes, ReactNode } from 'react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 type UiStatus =
@@ -97,58 +96,69 @@ function toNumber(value: unknown, fallback: number): number {
   return fallback
 }
 
-function cx(...parts: Array<string | false | null | undefined>): string {
-  return parts.filter(Boolean).join(' ')
+// ─── PCM16 오디오 재생 큐 ────────────────────────────────────────────────────
+class AudioQueue {
+  private ctx: AudioContext | null = null
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private queue: any[] = []
+  private playing = false
+  private nextStartTime = 0
+
+  private getCtx(): AudioContext {
+    if (!this.ctx || this.ctx.state === 'closed') {
+      this.ctx = new AudioContext({ sampleRate: 24000 })
+    }
+    if (this.ctx.state === 'suspended') {
+      this.ctx.resume()
+    }
+    return this.ctx
+  }
+
+  init() {
+    this.getCtx()
+  }
+
+  enqueue(base64: string) {
+    // base64 → ArrayBuffer → Int16 → Float32
+    const binary = atob(base64)
+    const bytes = new Uint8Array(binary.length)
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i)
+    const int16 = new Int16Array(bytes.buffer)
+    const float32 = new Float32Array(int16.length)
+    for (let i = 0; i < int16.length; i++) float32[i] = int16[i] / 32768
+    this.queue.push(float32)
+    if (!this.playing) this._pump()
+  }
+
+  private _pump() {
+    if (this.queue.length === 0) { this.playing = false; return }
+    this.playing = true
+    const ctx = this.getCtx()
+    const samples = this.queue.shift()!
+    const buf = ctx.createBuffer(1, samples.length, 24000)
+    buf.copyToChannel(samples, 0)
+    const src = ctx.createBufferSource()
+    src.buffer = buf
+    src.connect(ctx.destination)
+    const startAt = Math.max(ctx.currentTime, this.nextStartTime)
+    src.start(startAt)
+    this.nextStartTime = startAt + buf.duration
+    src.onended = () => this._pump()
+  }
+
+  flush() {
+    this.queue = []
+    this.playing = false
+    this.nextStartTime = 0
+    if (this.ctx && this.ctx.state !== 'closed') {
+      this.ctx.close()
+      this.ctx = null
+    }
+  }
 }
 
-function Panel({ className, children }: { className?: string; children: ReactNode }) {
-  return (
-    <section
-      className={cx(
-        'rounded-[16px] border border-white/10 bg-[rgba(255,255,255,0.06)] p-5 shadow-[0_4px_24px_rgba(0,0,0,0.3)] backdrop-blur-[12px] sm:p-6',
-        className,
-      )}
-    >
-      {children}
-    </section>
-  )
-}
-
-function Badge({ className, children }: { className?: string; children: ReactNode }) {
-  return (
-    <span className={cx('inline-flex items-center rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-[0.14em]', className)}>
-      {children}
-    </span>
-  )
-}
-
-function ScoreCard({ label, value }: { label: string; value: string | number }) {
-  return (
-    <div className="rounded-[16px] border border-white/10 bg-[rgba(255,255,255,0.08)] px-4 py-4 shadow-[0_4px_24px_rgba(0,0,0,0.3)] backdrop-blur-[12px]">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/70">{label}</p>
-      <p className="mt-2 text-[2.15em] font-black leading-none text-[#FF6B9D]">{value}</p>
-    </div>
-  )
-}
-
-function PrimaryButton({
-  className,
-  children,
-  ...props
-}: ButtonHTMLAttributes<HTMLButtonElement> & { className?: string; children: ReactNode }) {
-  return (
-    <button
-      type="button"
-      className={cx(
-        'min-h-12 w-full rounded-[14px] border px-5 py-3 text-sm font-extrabold tracking-wide transition duration-150 active:translate-y-[1px]',
-        className,
-      )}
-      {...props}
-    >
-      {children}
-    </button>
-  )
-}
+const audioQueue = new AudioQueue()
+// ──────────────────────────────────────────────────────────────────────────────
 
 function App() {
   const [status, setStatus] = useState<UiStatus>('Reconnecting')
@@ -163,6 +173,7 @@ function App() {
   const timelineIdRef = useRef(0)
 
   const userId = useMemo(() => getOrCreateUserId(), [])
+  const displayName = useMemo(() => `Player-${userId.slice(-4)}`, [userId])
 
   const pushEvent = useCallback((message: string) => {
     timelineIdRef.current += 1
@@ -205,8 +216,8 @@ function App() {
       sendJson({
         type: 'hello',
         userId,
-        displayName: `Player-${userId.slice(-4)}`,
-        version: 'web-ui-v1',
+        displayName,
+        version: 'web-ui-v2',
       })
     }
 
@@ -220,6 +231,14 @@ function App() {
           const nextStatus = toUiStatus(payload.state ?? payload.status ?? payload.value)
           if (nextStatus) {
             setStatus(nextStatus)
+          }
+          return
+        }
+
+        if (type === 'audio_out_chunk') {
+          const data = payload.data as string | undefined
+          if (data) {
+            audioQueue.enqueue(data)
           }
           return
         }
@@ -267,7 +286,7 @@ function App() {
         connectWebSocket()
       }, delayMs)
     }
-  }, [pushEvent, sendJson, userId])
+  }, [displayName, pushEvent, sendJson, userId])
 
   useEffect(() => {
     shouldReconnectRef.current = true
@@ -298,10 +317,12 @@ function App() {
   }, [status])
 
   const handleStartRun = () => {
+    audioQueue.init()
     sendJson({ type: 'start_run' })
   }
 
   const handleStopReset = () => {
+    audioQueue.flush()
     sendJson({ type: 'stop_reset' })
     setScore({ total: 0, best: 0, delta: 0 })
     setStatus(wsRef.current?.readyState === WebSocket.OPEN ? 'Listening' : 'Reconnecting')
@@ -309,6 +330,8 @@ function App() {
   }
 
   const handleAnswer = (answer: 'A' | 'B' | 'C') => {
+    // 즉시 로컬 오디오 중단 (체감 지연 최소화)
+    audioQueue.flush()
     sendJson({ type: 'barge_in', answer })
   }
 
@@ -319,13 +342,13 @@ function App() {
   }
 
   const statusClassName: Record<UiStatus, string> = {
-    Listening: 'bg-emerald-500/20 text-emerald-100 ring-1 ring-emerald-200/45',
-    Speaking: 'bg-sky-500/20 text-sky-100 ring-1 ring-sky-200/45',
-    Interrupted: 'bg-amber-500/20 text-amber-100 ring-1 ring-amber-200/45',
-    Judging: 'bg-orange-500/20 text-orange-100 ring-1 ring-orange-200/45',
-    Scored: 'bg-[#FF6B9D]/20 text-[#FFD6E4] ring-1 ring-[#FF6B9D]/45',
-    Reconnecting: 'bg-slate-500/20 text-slate-100 ring-1 ring-slate-200/30',
-    Error: 'bg-rose-500/20 text-rose-100 ring-1 ring-rose-200/45',
+    Listening: 'bg-emerald-500/10 text-emerald-400 ring-emerald-500/30',
+    Speaking: 'bg-blue-500/10 text-blue-400 ring-blue-500/30',
+    Interrupted: 'bg-amber-500/10 text-amber-400 ring-amber-500/30',
+    Judging: 'bg-orange-500/10 text-orange-400 ring-orange-500/30',
+    Scored: 'bg-purple-500/10 text-purple-400 ring-purple-500/30',
+    Reconnecting: 'bg-slate-500/10 text-slate-400 ring-slate-500/30',
+    Error: 'bg-rose-500/10 text-rose-400 ring-rose-500/30',
   }
 
   const faceSprite = (() => {
@@ -337,7 +360,7 @@ function App() {
       case 'Interrupted':
         return '/sprites/face/05_shocked.png'
       case 'Scored':
-        return lastCorrect ? '/sprites/face/06_proud.png' : '/sprites/face/07_confused.png'
+        return lastCorrect ? '/sprites/face/06_proud.png' : '/sprites/face/05_shocked.png'
       case 'Error':
       case 'Reconnecting':
         return '/sprites/face/07_confused.png'
@@ -350,122 +373,121 @@ function App() {
   const scorePopupSprite = status === 'Scored' ? (lastCorrect ? '/sprites/text/correct.png' : '/sprites/text/fail.png') : null
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[#121212] px-4 py-8 text-white sm:px-8 sm:py-10">
-      <div className="pointer-events-none absolute -left-24 -top-16 h-72 w-72 rounded-full bg-[#FF6B9D]/15 blur-3xl" />
-      <div className="pointer-events-none absolute -right-16 top-24 h-80 w-80 rounded-full bg-[#FF6B9D]/10 blur-3xl" />
-
-      <p className="absolute right-4 top-4 text-[11px] text-white/65 sm:right-8 sm:top-5">
-        userId: <span className="font-mono">{userId}</span>
-      </p>
-
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-8">
-        <Panel className="relative overflow-visible pt-10 sm:pt-12">
-          <div className="max-w-[44rem] pr-28 sm:pr-36">
-            <h1 className="text-4xl font-black leading-none tracking-tight text-[#FF6B9D] sm:text-6xl">Interruption Quiz</h1>
-            <p className="mt-4 text-sm leading-relaxed text-white/75 sm:text-base">
-              실시간 인터럽트 타이밍을 겨루는 게임 대시보드. 상태를 보고 즉시 선택해서 최고 점수를 갱신하세요.
-            </p>
-            <div className="mt-4">
-              <Badge className={statusClassName[status]}>{status}</Badge>
-            </div>
+    <main className="min-h-screen bg-[radial-gradient(circle_at_top,#164e63_0%,#0f172a_55%,#020617_100%)] px-3 py-5 text-slate-100 sm:px-5 sm:py-8">
+      <div className="mx-auto flex w-full max-w-4xl flex-col gap-3">
+        {/* Header Card */}
+        <header className="rounded-2xl ring-1 ring-white/5 bg-white/5 p-4 shadow-xl backdrop-blur-lg">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h1 className="text-2xl font-black tracking-tight sm:text-3xl">Quiz TMI</h1>
+            <span className={`rounded-full px-4 py-1 text-sm font-semibold ring-1 ${statusClassName[status]}`}>
+              {status}
+            </span>
           </div>
+          <details className="mt-2 group">
+            <summary className="cursor-pointer text-xs text-slate-500 hover:text-slate-300 transition-colors">
+              Session Info
+            </summary>
+            <p className="mt-2 text-xs text-slate-400 sm:text-sm font-mono bg-black/20 p-2 rounded">
+              ID: {userId} | User: {displayName}
+            </p>
+          </details>
+        </header>
 
-          <div className="pointer-events-none absolute -bottom-12 right-3 z-20 w-[140px] sm:-bottom-16 sm:right-8 sm:w-[220px]">
-            <img
-              src={faceSprite}
-              alt={`Luca ${status}`}
-              className="h-auto w-full select-none [filter:drop-shadow(0_0_20px_rgba(255,107,157,0.6))]"
-            />
-            {scorePopupSprite ? (
+        {/* Success/Fail Image Section */}
+        <section className={`transition-all duration-300 ${status === 'Scored' ? 'h-24 opacity-100' : 'h-0 opacity-0 invisible'}`}>
+           {scorePopupSprite && (
               <img
                 src={scorePopupSprite}
                 alt={lastCorrect ? 'Correct' : 'Fail'}
-                className="absolute -left-10 top-1 h-auto w-[70%] select-none object-contain [filter:drop-shadow(0_0_16px_rgba(255,255,255,0.5))]"
+                className="mx-auto h-24 w-full max-w-[240px] object-contain select-none"
               />
-            ) : null}
+           )}
+        </section>
+
+        {/* Avatar Section */}
+        <section className="rounded-2xl ring-1 ring-white/5 bg-white/5 p-4 shadow-xl backdrop-blur-lg">
+          <div className="relative mx-auto w-full max-w-[320px] overflow-hidden">
+            <img 
+              src={faceSprite} 
+              alt={`Luca ${status}`} 
+              className="mx-auto block w-full max-h-[180px] sm:max-h-none object-contain select-none" 
+            />
           </div>
-        </Panel>
+        </section>
 
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.4fr_1fr]">
-          <div className="flex flex-col gap-6">
-            <section>
-              <p className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-white/55">Scoreboard</p>
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                <ScoreCard label="Total" value={score.total} />
-                <ScoreCard label="Best" value={score.best} />
-                <ScoreCard label="Delta" value={score.delta >= 0 ? `+${score.delta}` : score.delta} />
-              </div>
-            </section>
+        {/* Score Cards */}
+        <section className="grid grid-cols-3 gap-2 sm:gap-3">
+          <div className="rounded-2xl ring-1 ring-white/5 bg-white/5 p-2 sm:p-4 text-center shadow-xl backdrop-blur-lg">
+            <p className="text-[10px] sm:text-sm text-slate-400 uppercase tracking-wider">Total</p>
+            <p className="mt-1 text-2xl sm:text-3xl font-black">{score.total}</p>
+          </div>
+          <div className="rounded-2xl ring-1 ring-white/5 bg-white/5 p-2 sm:p-4 text-center shadow-xl backdrop-blur-lg">
+            <p className="text-[10px] sm:text-sm text-slate-400 uppercase tracking-wider">Best</p>
+            <p className="mt-1 text-2xl sm:text-3xl font-black">{score.best}</p>
+          </div>
+          <div className="rounded-2xl ring-1 ring-white/5 bg-white/5 p-2 sm:p-4 text-center shadow-xl backdrop-blur-lg">
+            <p className="text-[10px] sm:text-sm text-slate-400 uppercase tracking-wider">Delta</p>
+            <p className="mt-1 text-2xl sm:text-3xl font-black">{score.delta >= 0 ? `+${score.delta}` : score.delta}</p>
+          </div>
+        </section>
 
-            <Panel>
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <PrimaryButton
-                  onClick={handleStartRun}
-                  className="border-[#FF6B9D]/70 bg-[#FF6B9D] text-[#1D0D14] shadow-[0_8px_18px_rgba(255,107,157,0.35)] hover:brightness-110"
-                >
-                  Start Run
-                </PrimaryButton>
-                <PrimaryButton
-                  onClick={handleStopReset}
-                  className="border-white/20 bg-white/8 text-white shadow-[0_8px_18px_rgba(0,0,0,0.28)] hover:bg-white/15"
-                >
-                  Stop / Reset
-                </PrimaryButton>
-              </div>
+        {/* Action Buttons Container */}
+        <section className="sticky bottom-0 z-10 -mx-3 -mb-5 mt-auto space-y-3 bg-white/5 p-4 backdrop-blur-lg sm:static sm:mx-0 sm:mb-0 sm:mt-0 sm:rounded-2xl sm:ring-1 sm:ring-white/5 sm:shadow-xl">
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              type="button"
+              onClick={handleStartRun}
+              className="min-h-12 w-full rounded-xl border-b-4 border-blue-700 bg-blue-500 px-5 py-3 text-lg font-black text-white transition hover:brightness-110 active:translate-y-[2px] active:border-b-0"
+            >
+              Start Run
+            </button>
+            <button
+              type="button"
+              onClick={handleStopReset}
+              className="min-h-12 w-full rounded-xl border-b-4 border-red-700 bg-red-600 px-5 py-3 text-lg font-black text-white transition hover:brightness-110 active:translate-y-[2px] active:border-b-0"
+            >
+              Stop
+            </button>
+          </div>
 
-              <div className="mt-5 grid grid-cols-3 gap-3">
-                {(['A', 'B', 'C'] as const).map((choice) => (
-                  <button
-                    key={choice}
-                    type="button"
-                    onClick={() => handleAnswer(choice)}
-                    className="aspect-square w-full rounded-full border border-[#FF6B9D]/70 bg-[#2B1A22] text-4xl font-black text-[#FF6B9D] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06),0_10px_24px_rgba(0,0,0,0.3)] transition hover:brightness-125 active:translate-y-[1px]"
-                  >
-                    {choice}
-                  </button>
-                ))}
-              </div>
-
-              <PrimaryButton
-                onClick={handleSimulateDrop}
-                className="mt-5 border-white/15 bg-[#1B1B1B] text-white/85 shadow-[0_8px_18px_rgba(0,0,0,0.3)] hover:bg-[#262626]"
+          <div className="grid grid-cols-3 gap-3">
+            {(['A', 'B', 'C'] as const).map((choice) => (
+              <button
+                key={choice}
+                type="button"
+                onClick={() => handleAnswer(choice)}
+                className="min-h-[4rem] w-full rounded-xl border-b-4 border-cyan-700 bg-cyan-500 px-4 py-3 text-3xl font-black text-slate-950 transition hover:brightness-110 active:translate-y-[2px] active:border-b-0"
               >
-                Simulate Drop
-              </PrimaryButton>
-            </Panel>
+                {choice}
+              </button>
+            ))}
           </div>
 
-          <Panel>
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-bold tracking-tight text-white">Event Timeline</h2>
-              <Badge className="bg-white/10 text-white/80 ring-1 ring-white/15">Last 10</Badge>
-            </div>
+          <button
+            type="button"
+            onClick={handleSimulateDrop}
+            className="w-full text-xs font-bold text-slate-500 transition hover:text-slate-300"
+          >
+            Simulate Connection Drop
+          </button>
+        </section>
 
-            <ul className="mt-4 space-y-2">
-              {timeline.length === 0 ? (
-                <li className="rounded-xl border border-white/10 bg-black/20 px-3 py-2.5 text-sm text-white/55">No events yet.</li>
-              ) : (
-                timeline.map((item) => {
-                  const isOutbound = item.message.startsWith('Sent')
-                  const isInbound = item.message.startsWith('Received')
-                  const icon = isOutbound ? '↑' : isInbound ? '↓' : '•'
-
-                  return (
-                    <li key={item.id} className="flex items-start gap-3 rounded-xl border border-white/10 bg-black/20 px-3 py-2.5">
-                      <span className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#FF6B9D]/20 text-[11px] font-bold text-[#FF6B9D] ring-1 ring-[#FF6B9D]/35">
-                        {icon}
-                      </span>
-                      <div className="min-w-0">
-                        <p className="font-mono text-[11px] text-white/45">{item.timestamp}</p>
-                        <p className="mt-0.5 text-sm leading-snug text-white/85">{item.message}</p>
-                      </div>
-                    </li>
-                  )
-                })
-              )}
-            </ul>
-          </Panel>
-        </div>
+        {/* Timeline Section */}
+        <section className="rounded-2xl ring-1 ring-white/5 bg-white/5 p-4 shadow-xl backdrop-blur-lg">
+          <h2 className="text-sm font-semibold text-slate-400">Timeline</h2>
+          <ul className="mt-3 space-y-2">
+            {timeline.length === 0 ? (
+              <li className="text-xs text-slate-600">Waiting for events...</li>
+            ) : (
+              timeline.map((item) => (
+                <li key={item.id} className="flex gap-2 text-xs border-b border-white/5 pb-1 last:border-0">
+                  <span className="font-mono text-slate-500 whitespace-nowrap">{item.timestamp}</span>
+                  <span className="text-slate-300 truncate">{item.message}</span>
+                </li>
+              ))
+            )}
+          </ul>
+        </section>
       </div>
     </main>
   )

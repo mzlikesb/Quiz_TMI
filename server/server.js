@@ -3,6 +3,7 @@ const fs = require("fs");
 const path = require("path");
 const express = require("express");
 const { WebSocketServer } = require("ws");
+const { startLiveSpeak } = require("./live");
 
 const PORT = Number(process.env.PORT || 8080);
 const app = express();
@@ -69,6 +70,7 @@ function getOrCreateSession(ws) {
       currentQuestion: null,
       answered: false,
       isAlive: true,
+      liveSession: null,   // Gemini Live 세션 핸들
     });
   }
   return sessions.get(ws);
@@ -105,6 +107,12 @@ function handleMessage(ws, raw) {
       break;
     }
     case "start_run": {
+      // 이전 Live 세션 정리
+      if (session.liveSession) {
+        try { session.liveSession.close(); } catch {}
+        session.liveSession = null;
+      }
+
       const selectedQuestion = selectRandomQuestion();
       session.currentRunId = createRunId();
       session.questionStartedAtMs = Date.now();
@@ -123,11 +131,67 @@ function handleMessage(ws, raw) {
         qId: session.currentQuestion.id,
         choices: session.currentQuestion.choices,
       });
-      sendFrame(ws, "audio_out_chunk", {
-        runId: session.currentRunId,
-        chunk: "",
-        format: "pcm16-placeholder",
-      });
+
+      // Gemini Live 세션 시작 (문제+선택지+뇌절 멘트 조합)
+      const q = session.currentQuestion;
+      const tmi = (q.tmi_stream || []).slice(0, 2).join(' ');
+      const speakText = [
+        `문제! ${q.question}`,
+        `A: ${q.choices.A}`,
+        `B: ${q.choices.B}`,
+        `C: ${q.choices.C}`,
+        tmi ? `그리고... ${tmi}` : '',
+      ].filter(Boolean).join(' ');
+
+      const runId = session.currentRunId; // 클로저용
+
+      startLiveSpeak({
+        text: speakText,
+        onAudioChunk: ({ data, mimeType }) => {
+          // 현재 run이 여전히 유효한지 확인
+          if (session.currentRunId !== runId) return;
+          if (ws.readyState !== ws.OPEN) return;
+          sendFrame(ws, "audio_out_chunk", {
+            runId,
+            data,       // base64 PCM16
+            mimeType,
+            sampleRate: 24000,
+            codec: 'pcm16',
+          });
+        },
+        onInterrupted: () => {
+          logEvent("live_interrupted", { runId, userId: session.userId });
+        },
+        onDone: (err) => {
+          if (err) {
+            logEvent("live_error", { runId, userId: session.userId, message: err?.message });
+          } else {
+            logEvent("live_done", { runId, userId: session.userId });
+          }
+          // Live 세션 정리
+          if (session.liveSession) {
+            session.liveSession = null;
+          }
+        },
+      })
+        .then((handle) => {
+          // 비동기로 handle이 반환됨 — 아직 run이 유효하면 저장
+          if (session.currentRunId === runId) {
+            session.liveSession = handle;
+          } else {
+            // 이미 barge_in이 왔으면 즉시 닫기
+            try { handle.close(); } catch {}
+          }
+        })
+        .catch((err) => {
+          logEvent("live_connect_error", {
+            runId,
+            userId: session.userId,
+            message: err?.message,
+          });
+          sendFrame(ws, "state", { state: "error", reason: "live_connect_failed" });
+        });
+
       break;
     }
     case "barge_in": {
@@ -149,6 +213,13 @@ function handleMessage(ws, raw) {
       }
 
       session.answered = true;
+
+      // Gemini Live 출력 즉시 중단
+      if (session.liveSession) {
+        try { session.liveSession.close(); } catch {}
+        session.liveSession = null;
+      }
+
       const elapsedMs = Date.now() - session.questionStartedAtMs;
       const answer = String(msg.answer || "").toUpperCase();
       const correct = answer === session.currentQuestion.answer;
