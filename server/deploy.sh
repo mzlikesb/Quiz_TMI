@@ -9,7 +9,7 @@ gcloud run deploy $SERVICE_NAME \
   --project $PROJECT_ID \
   --region $REGION \
   --allow-unauthenticated \
-  --set-env-vars="GCP_PROJECT_ID=$PROJECT_ID,VERTEX_LOCATION=$REGION,GEMINI_MODEL=gemini-2.0-flash,FIRESTORE_DATABASE=quiz-tmi" \
+  --set-env-vars="GCP_PROJECT_ID=$PROJECT_ID,VERTEX_LOCATION=$REGION,GEMINI_MODEL=gemini-live-2.5-flash-native-audio,FIRESTORE_DATABASE=quiz-tmi" \
   --timeout=3600 \
   --min-instances=0 \
   --max-instances=10
