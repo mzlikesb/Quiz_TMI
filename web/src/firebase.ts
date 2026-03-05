@@ -7,8 +7,8 @@ export const firebaseConfig = {
   projectId: 'quiz-tmi',
   storageBucket: 'quiz-tmi.firebasestorage.app',
   messagingSenderId: '137545013592',
-  appId: '1:137545013592:web:76849a8a782acc403b2d2d',
-  measurementId: 'G-4EN3QFRZ4D',
+  appId: '1:137545013592:web:e0ad3c232457e2953b2d2d',
+  measurementId: 'G-ESC69N6PBT',
 }
 
 export const firebaseApp = initializeApp(firebaseConfig)
